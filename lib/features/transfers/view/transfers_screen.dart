@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/transfers_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/widgets/app_search_bar.dart';
-import '../../../core/widgets/empty_state.dart';
-import '../widgets/transfer_list_item.dart';
-import '../widgets/transfer_filter_tabs.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+import 'package:library_managment/Core/Routes/app_routes.dart';
+import 'package:library_managment/Core/Widgets/app_search_bar.dart';
+import 'package:library_managment/Core/Widgets/empty_state.dart';
+import 'package:library_managment/features/transfers/controller/transfers_controller.dart';
+import 'package:library_managment/features/transfers/widgets/transfer_filter_tabs.dart';
+import 'package:library_managment/features/transfers/widgets/transfer_list_item.dart';
 
 class TransfersScreen extends GetView<TransfersController> {
   const TransfersScreen({super.key});

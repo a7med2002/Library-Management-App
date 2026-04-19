@@ -24,30 +24,36 @@ class SettingsScreen extends GetView<SettingsController> {
               child: Column(
                 children: [
                   // ── Profile Card ──────────────────────
-                  Obx(() => SettingsProfileCard(
-                        name: controller.employeeName.value,
-                        email: controller.employeeEmail.value,
-                        onSignOut: controller.signOut,
-                      )),
+                  Obx(
+                    () => SettingsProfileCard(
+                      name: controller.employeeName.value,
+                      email: controller.employeeEmail.value,
+                      onSignOut: controller.signOut,
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
                   // ── App Section ───────────────────────
                   SettingsSection(
                     title: 'التطبيق',
                     children: [
-                      Obx(() => SettingsTile(
-                            icon: Icons.storefront_rounded,
-                            label: 'اسم المتجر',
-                            value: controller.storeName.value,
-                            onTap: controller.goToStoreName,
-                          )),
-                      Obx(() => SettingsTile(
-                            icon: Icons.attach_money_rounded,
-                            label: 'العملة الافتراضية',
-                            value: controller.defaultCurrency.value,
-                            onTap: controller.goToCurrency,
-                            showDivider: false,
-                          )),
+                      Obx(
+                        () => SettingsTile(
+                          icon: Icons.storefront_rounded,
+                          label: 'اسم المتجر',
+                          value: controller.storeName.value,
+                          onTap: () {},
+                        ),
+                      ),
+                      Obx(
+                        () => SettingsTile(
+                          icon: Icons.attach_money_rounded,
+                          label: 'العملة الافتراضية',
+                          value: controller.defaultCurrency.value,
+                          onTap: () {},
+                          showDivider: false,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -56,32 +62,49 @@ class SettingsScreen extends GetView<SettingsController> {
                   SettingsSection(
                     title: 'الموظفون',
                     children: [
-                      Obx(() => SettingsTile(
-                            icon: Icons.group_rounded,
-                            label: 'إدارة الموظفين',
-                            value:
-                                '${controller.employeesCount.value} موظفين',
-                            onTap: controller.goToEmployees,
-                            showDivider: false,
-                          )),
+                      Obx(
+                        () => SettingsTile(
+                          icon: Icons.group_rounded,
+                          label: 'إدارة الموظفين',
+                          value: '${controller.employeesCount.value} موظفين',
+                          onTap: () {},
+                          showDivider: false,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
 
+                  // ── Accounts Management Section ─────────────────
+                  SettingsSection(
+                    title: 'حسابات الاستلام',
+                    children: [
+                      SettingsTile(
+                        icon: Icons.account_balance_rounded,
+                        label: 'إدارة الحسابات',
+                        value: '',
+                        onTap: controller.goToAccounts,
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   // ── About Section ─────────────────────
                   SettingsSection(
                     title: 'حول التطبيق',
                     children: [
-                      Obx(() => SettingsTile(
-                            icon: Icons.info_outline_rounded,
-                            label: 'الإصدار',
-                            value: controller.appVersion.value,
-                            showArrow: false,
-                          )),
+                      Obx(
+                        () => SettingsTile(
+                          icon: Icons.info_outline_rounded,
+                          label: 'الإصدار',
+                          value: controller.appVersion.value,
+                          showArrow: false,
+                        ),
+                      ),
                       SettingsTile(
                         icon: Icons.mail_outline_rounded,
                         label: 'تواصل معنا',
-                        onTap: controller.goToContactUs,
+                        onTap: () {},
                         showDivider: false,
                       ),
                     ],

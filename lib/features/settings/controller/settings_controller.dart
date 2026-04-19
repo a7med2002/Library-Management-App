@@ -1,46 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/routes/app_routes.dart';
+import 'package:library_managment/Core/Routes/app_routes.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/services/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsController extends GetxController {
-  final RxString employeeName = 'أحمد محمد'.obs;
-  final RxString employeeEmail = 'ahmed@darmiqdad.com'.obs;
+  final RxString employeeName = ''.obs;
+  final RxString employeeEmail = ''.obs;
   final RxString storeName = 'مكتبة دار المقداد'.obs;
   final RxString defaultCurrency = 'شيكل ₪'.obs;
-  final RxInt employeesCount = 3.obs;
+  final RxInt employeesCount = 0.obs;
   final RxString appVersion = '1.0.0'.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadUser();
+    _loadSettings();
+  }
+
+  // void _loadUser() {
+  //   final user = AuthService.currentUser;
+  //   if (user != null) {
+  //     employeeName.value = user.name;
+  //     employeeEmail.value = user.email;
+  //   }
+  // }
+  void _loadUser() {
+    final user = AuthService.currentUser;
+    if (user != null) {
+      employeeName.value = user.name.isNotEmpty ? user.name : 'مستخدم';
+      employeeEmail.value = user.email.isNotEmpty ? user.email : '';
+      return;
+    }
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      employeeName.value = firebaseUser.displayName ?? 'مستخدم';
+      employeeEmail.value = firebaseUser.email ?? '';
+    }
+  }
+
+  Future<void> _loadSettings() async {
+    final data = await FirestoreService.getSettings();
+    if (data != null) {
+      storeName.value = data['storeName'] ?? storeName.value;
+      defaultCurrency.value = data['currency'] ?? defaultCurrency.value;
+    }
+  }
 
   Future<void> signOut() async {
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
+        title: const Text(
           'تسجيل الخروج',
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.bold,
-            fontSize: 17,
-          ),
           textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
         ),
-        content: Text(
+        content: const Text(
           'هل أنت متأكد من تسجيل الخروج؟',
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 14,
-            color: Color(0xff6B7280),
-          ),
           textAlign: TextAlign.right,
+          style: TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
             child: const Text(
               'إلغاء',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                color: Color(0xff6B7280),
-              ),
+              style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
             ),
           ),
           TextButton(
@@ -59,24 +88,20 @@ class SettingsController extends GetxController {
     );
 
     if (confirmed == true) {
-      // TODO: Firebase sign out
+      await AuthService.signOut();
       Get.offAllNamed(AppRoutes.login);
     }
   }
 
-  void goToStoreName() {
-    // TODO: Navigate to edit store name
+  Future<void> updateStoreName(String name) async {
+    storeName.value = name;
+    await FirestoreService.updateSettings({'storeName': name});
   }
 
-  void goToCurrency() {
-    // TODO: Navigate to edit currency
+  Future<void> updateCurrency(String currency) async {
+    defaultCurrency.value = currency;
+    await FirestoreService.updateSettings({'currency': currency});
   }
 
-  void goToEmployees() {
-    // TODO: Navigate to employees management
-  }
-
-  void goToContactUs() {
-    // TODO: Launch email or URL
-  }
+  void goToAccounts() => Get.toNamed(AppRoutes.addAccount);
 }

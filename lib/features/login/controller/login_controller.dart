@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:library_managment/Core/Routes/app_routes.dart';
+import 'package:library_managment/Core/Services/auth_service.dart';
 
 class LoginController extends GetxController {
   final RxBool isLoading = false.obs;
@@ -7,8 +8,10 @@ class LoginController extends GetxController {
   Future<void> signInWithGoogle() async {
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
-      Get.offAllNamed(AppRoutes.main);
+      final user = await AuthService.signInWithGoogle();
+      if (user != null) {
+        Get.offAllNamed(AppRoutes.main);
+      }
     } catch (e) {
       Get.snackbar(
         'خطأ',

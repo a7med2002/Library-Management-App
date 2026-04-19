@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../model/payment_model.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+import 'package:library_managment/features/payment/model/payment_model.dart';
+
 
 class PaymentListItem extends StatelessWidget {
   final PaymentModel payment;

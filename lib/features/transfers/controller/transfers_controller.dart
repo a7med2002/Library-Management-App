@@ -1,60 +1,29 @@
 import 'package:get/get.dart';
-import '../model/transfer_model.dart';
+import 'package:library_managment/features/transfers/model/transfer_model.dart';
+import '../../../core/services/firestore_service.dart';
 
 enum TransferFilter { all, received, pending }
 
 class TransfersController extends GetxController {
-  final RxList<TransferModel> allTransfers = <TransferModel>[].obs;
-  final RxList<TransferModel> filteredTransfers = <TransferModel>[].obs;
+  RxList<TransferModel> allTransfers = <TransferModel>[].obs;
+  RxList<TransferModel> filteredTransfers = <TransferModel>[].obs;
   final RxString searchQuery = ''.obs;
   final Rx<TransferFilter> activeFilter = TransferFilter.all.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadDummyData();
-    _applyFilter();
+    _listenTransfers();
   }
 
-  void _loadDummyData() {
-    allTransfers.value = [
-      TransferModel(
-        id: '1',
-        senderName: 'خالد يوسف',
-        referenceNumber: 'REF-20240115-001',
-        amount: 500,
-        accountName: 'بنك — أحمد',
-        status: TransferStatus.pending,
-        date: DateTime(2024, 1, 15),
-      ),
-      TransferModel(
-        id: '2',
-        senderName: 'محمود علي',
-        referenceNumber: 'REF-20240115-002',
-        amount: 1200,
-        accountName: 'محفظة BI — أحمد',
-        status: TransferStatus.received,
-        date: DateTime(2024, 1, 15),
-      ),
-      TransferModel(
-        id: '3',
-        senderName: 'عبدالرحمن سعيد',
-        referenceNumber: 'REF-20240114-003',
-        amount: 800,
-        accountName: 'جوال باي — أحمد',
-        status: TransferStatus.received,
-        date: DateTime(2024, 1, 14),
-      ),
-      TransferModel(
-        id: '4',
-        senderName: 'ياسر عمر',
-        referenceNumber: 'REF-20240114-004',
-        amount: 350,
-        accountName: 'محفظة — عمرو',
-        status: TransferStatus.pending,
-        date: DateTime(2024, 1, 14),
-      ),
-    ];
+  void _listenTransfers() {
+    FirestoreService.transfersStream().listen((list) {
+      allTransfers.value = list.map((e) {
+        return TransferModel.fromMap(e, e['id']);
+      }).toList();
+
+      _applyFilter();
+    });
   }
 
   void onSearchChanged(String query) {
@@ -72,9 +41,11 @@ class TransfersController extends GetxController {
 
     if (searchQuery.value.isNotEmpty) {
       result = result
-          .where((t) =>
-              t.senderName.contains(searchQuery.value) ||
-              t.referenceNumber.contains(searchQuery.value))
+          .where(
+            (t) =>
+                t.senderName.contains(searchQuery.value) ||
+                t.referenceNumber.contains(searchQuery.value),
+          )
           .toList();
     }
 
@@ -83,15 +54,26 @@ class TransfersController extends GetxController {
           .where((t) => t.status == TransferStatus.received)
           .toList();
     } else if (activeFilter.value == TransferFilter.pending) {
-      result = result
-          .where((t) => t.status == TransferStatus.pending)
-          .toList();
+      result = result.where((t) => t.status == TransferStatus.pending).toList();
     }
 
     filteredTransfers.value = result;
   }
 
-  String formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  Future<void> updateStatus(String id, String status) async {
+    await FirestoreService.updateTransferStatus(id, status);
+  }
+
+  String formatDate(dynamic timestamp) {
+    if (timestamp == null) return '';
+
+    // ✅ تعامل مع Timestamp و DateTime معاً
+    final DateTime date = timestamp is DateTime
+        ? timestamp
+        : timestamp.toDate();
+
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
   }
 }

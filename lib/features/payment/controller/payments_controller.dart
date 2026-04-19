@@ -1,56 +1,42 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../model/payment_model.dart';
+import 'package:library_managment/features/payment/model/payment_model.dart';
+import '../../../core/services/firestore_service.dart';
 
 enum PaymentFilter { today, thisWeek, custom }
 
 class PaymentsController extends GetxController {
-  final RxList<PaymentModel> allPayments = <PaymentModel>[].obs;
-  final RxList<PaymentModel> filteredPayments = <PaymentModel>[].obs;
+  // final RxList<Map<String, dynamic>> allPayments =
+  //     <Map<String, dynamic>>[].obs;
+  // final RxList<Map<String, dynamic>> filteredPayments =
+  //     <Map<String, dynamic>>[].obs;
+  RxList<PaymentModel> allPayments = <PaymentModel>[].obs;
+  RxList<PaymentModel> filteredPayments = <PaymentModel>[].obs;
   final RxString searchQuery = ''.obs;
   final Rx<PaymentFilter> activeFilter = PaymentFilter.today.obs;
+  final Rx<DateTime> selectedDate = DateTime.now().obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadDummyData();
-    _applyFilter();
+    _listenPayments();
   }
 
-  void _loadDummyData() {
-    allPayments.value = [
-      PaymentModel(
-        id: '1',
-        customerName: 'أحمد محمد',
-        amount: 150,
-        serviceType: ServiceType.printing,
-        accountName: 'بنك — أحمد',
-        date: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      PaymentModel(
-        id: '2',
-        customerName: 'سارة عبدالله',
-        amount: 75,
-        serviceType: ServiceType.photocopying,
-        accountName: 'محفظة BI — أحمد',
-        date: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-      PaymentModel(
-        id: '3',
-        customerName: 'فاطمة حسن',
-        amount: 320,
-        serviceType: ServiceType.other,
-        accountName: 'جوال باي — أحمد',
-        date: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      PaymentModel(
-        id: '4',
-        customerName: 'عمر خالد',
-        amount: 200,
-        serviceType: ServiceType.printing,
-        accountName: 'بنك — أحمد',
-        date: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-    ];
+  // void _listenPayments() {
+  //   FirestoreService.paymentsStream(selectedDate.value).listen((list) {
+  //     allPayments.value = list;
+  //     _applyFilter();
+  //   });
+  // }
+
+  void _listenPayments() {
+    FirestoreService.paymentsStream(selectedDate.value).listen((list) {
+      allPayments.value = list.map((e) {
+        return PaymentModel.fromMap(e, e['id']);
+      }).toList();
+
+      _applyFilter();
+    });
   }
 
   void onSearchChanged(String query) {
@@ -63,37 +49,60 @@ class PaymentsController extends GetxController {
     _applyFilter();
   }
 
+  // void _applyFilter() {
+  //   List<Map<String, dynamic>> result = List.from(allPayments);
+  //   if (searchQuery.value.isNotEmpty) {
+  //     result = result
+  //         .where(
+  //           (p) => (p['customerName'] as String).contains(searchQuery.value),
+  //         )
+  //         .toList();
+  //   }
+  //   filteredPayments.value = result;
+  // }
+
   void _applyFilter() {
     List<PaymentModel> result = List.from(allPayments);
 
-    // Search
     if (searchQuery.value.isNotEmpty) {
       result = result
           .where((p) => p.customerName.contains(searchQuery.value))
           .toList();
     }
 
-    // Date filter
-    final now = DateTime.now();
-    if (activeFilter.value == PaymentFilter.today) {
-      result = result
-          .where((p) =>
-              p.date.day == now.day &&
-              p.date.month == now.month &&
-              p.date.year == now.year)
-          .toList();
-    } else if (activeFilter.value == PaymentFilter.thisWeek) {
-      final weekAgo = now.subtract(const Duration(days: 7));
-      result = result.where((p) => p.date.isAfter(weekAgo)).toList();
-    }
-
     filteredPayments.value = result;
   }
 
-  String formatTime(DateTime date) {
+  String formatTime(dynamic timestamp) {
+    if (timestamp == null) return '';
+    final DateTime date = timestamp is DateTime
+        ? timestamp
+        : timestamp.toDate();
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final m = date.minute.toString().padLeft(2, '0');
     final period = date.hour < 12 ? 'ص' : 'م';
     return '$hour:$m $period';
+  }
+
+  IconData serviceIcon(String type) {
+    switch (type) {
+      case 'printing':
+        return Icons.print_rounded;
+      case 'photocopying':
+        return Icons.document_scanner_rounded;
+      default:
+        return Icons.miscellaneous_services_rounded;
+    }
+  }
+
+  String serviceLabel(String type) {
+    switch (type) {
+      case 'printing':
+        return 'طباعة';
+      case 'photocopying':
+        return 'تصوير';
+      default:
+        return 'خدمة أخرى';
+    }
   }
 }

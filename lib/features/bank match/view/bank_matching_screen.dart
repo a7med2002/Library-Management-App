@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
 import 'package:library_managment/Core/Widgets/app_primary_button.dart';
 import 'package:library_managment/core/models/receiving_account_model.dart';
-import '../controller/bank_matching_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../widgets/step_indicator.dart';
-import '../widgets/upload_box.dart';
-import '../widgets/match_result_item.dart';
+import 'package:library_managment/features/bank%20match/controller/bank_matching_controller.dart';
+import 'package:library_managment/features/bank%20match/widgets/match_result_item.dart';
+import 'package:library_managment/features/bank%20match/widgets/step_indicator.dart';
+import 'package:library_managment/features/bank%20match/widgets/upload_box.dart';
 
 class BankMatchingScreen extends GetView<BankMatchingController> {
   const BankMatchingScreen({super.key});

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+
 
 class ReportStatCard extends StatelessWidget {
   final String title;

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 enum ServiceType { printing, photocopying, other }
@@ -20,6 +21,31 @@ class PaymentModel {
     required this.accountName,
     required this.date,
   });
+
+  factory PaymentModel.fromMap(Map<String, dynamic> map, String id) {
+    return PaymentModel(
+      id: id,
+      customerName: map['customerName'] ?? '',
+      amount: (map['amount'] ?? 0).toDouble(),
+      serviceType: _parseServiceType(map['serviceType']),
+      accountName: map['accountName'] ?? '',
+      // ✅ نفس الإصلاح
+      date: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+    );
+  }
+
+  static ServiceType _parseServiceType(String? type) {
+    switch (type) {
+      case 'printing':
+        return ServiceType.printing;
+      case 'photocopying':
+        return ServiceType.photocopying;
+      default:
+        return ServiceType.other;
+    }
+  }
 
   String get serviceTypeAr {
     switch (serviceType) {

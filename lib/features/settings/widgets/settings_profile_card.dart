@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
 
 class SettingsProfileCard extends StatelessWidget {
   final String name;
@@ -36,11 +36,7 @@ class SettingsProfileCard extends StatelessWidget {
             onTap: onSignOut,
             child: Row(
               children: [
-                const Icon(
-                  Icons.logout_rounded,
-                  color: kErrorColor,
-                  size: 18,
-                ),
+                const Icon(Icons.logout_rounded, color: kErrorColor, size: 18),
                 const SizedBox(width: 4),
                 Text(
                   'تسجيل الخروج',
@@ -87,7 +83,7 @@ class SettingsProfileCard extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                name.characters.first,
+                name.isNotEmpty ? name.characters.first : 'م',
                 style: AppTextStyles.titleMedium.copyWith(
                   color: kPrimaryColor,
                   fontWeight: FontWeight.bold,

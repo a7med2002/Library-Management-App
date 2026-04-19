@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+import 'package:library_managment/Core/Routes/app_routes.dart';
 import 'package:library_managment/Core/Widgets/app_primary_button.dart';
 import 'package:library_managment/Core/Widgets/app_text_field.dart';
-import 'package:library_managment/features/transfers/model/transfer_model.dart';
-import '../controller/add_transfer_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/models/receiving_account_model.dart';
-
+import 'package:library_managment/core/models/receiving_account_model.dart';
+import 'package:library_managment/features/add%20transfer/controller/add_transfer_controller.dart';
 
 class AddTransferScreen extends GetView<AddTransferController> {
   const AddTransferScreen({super.key});
@@ -54,7 +53,7 @@ class AddTransferScreen extends GetView<AddTransferController> {
                     hint: '0.00',
                     icon: Icons.attach_money_rounded,
                     keyboardType: TextInputType.number,
-                    suffixText: '\$',
+                    suffixText: '₪',
                     textAlign: TextAlign.end,
                   ),
                   const SizedBox(height: 20),
@@ -63,6 +62,10 @@ class AddTransferScreen extends GetView<AddTransferController> {
                   _SectionLabel('الحساب المستقبِل'),
                   const SizedBox(height: 10),
                   _AccountsList(),
+                  const SizedBox(height: 20),
+
+                  // ── إضافة حساب جديد ──────────────────
+                  _AddAccountButton(),
                   const SizedBox(height: 20),
 
                   // ── حالة الحوالة ──────────────────────
@@ -78,11 +81,13 @@ class AddTransferScreen extends GetView<AddTransferController> {
                   const SizedBox(height: 28),
 
                   // ── زر الحفظ ─────────────────────────
-                  Obx(() => AppPrimaryButton(
-                        label: 'حفظ الحوالة',
-                        isLoading: controller.isLoading.value,
-                        onTap: controller.submitTransfer,
-                      )),
+                  Obx(
+                    () => AppPrimaryButton(
+                      label: 'حفظ الحوالة',
+                      isLoading: controller.isLoading.value,
+                      onTap: controller.submitTransfer,
+                    ),
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -146,19 +151,23 @@ class _SectionLabel extends StatelessWidget {
 class _AccountsList extends GetView<AddTransferController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Column(
-          children: controller.accounts
-              .map((account) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _AccountCard(
-                      account: account,
-                      isSelected:
-                          controller.selectedAccount.value?.id == account.id,
-                      onTap: () => controller.selectAccount(account),
-                    ),
-                  ))
-              .toList(),
-        ));
+    return Obx(
+      () => Column(
+        children: controller.accounts
+            .map(
+              (account) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _AccountCard(
+                  account: account,
+                  isSelected:
+                      controller.selectedAccount.value?.id == account.id,
+                  onTap: () => controller.selectAccount(account),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }
 
@@ -226,11 +235,7 @@ class _AccountCard extends StatelessWidget {
                 color: kBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                account.icon,
-                color: kPrimaryColor,
-                size: 22,
-              ),
+              child: Icon(account.icon, color: kPrimaryColor, size: 22),
             ),
           ],
         ),
@@ -243,31 +248,31 @@ class _AccountCard extends StatelessWidget {
 class _StatusSelector extends GetView<AddTransferController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Row(
-          children: [
-            Expanded(
-              child: _StatusOption(
-                label: 'واصلة',
-                emoji: '✅',
-                isSelected:
-                    controller.transferStatus.value == TransferStatus.received,
-                selectedColor: kSuccessColor,
-                onTap: () => controller.selectStatus(TransferStatus.received),
-              ),
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: _StatusOption(
+              label: 'واصلة',
+              emoji: '✅',
+              isSelected: controller.transferStatus.value == "received",
+              selectedColor: kSuccessColor,
+              onTap: () => controller.selectStatus("received"),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _StatusOption(
-                label: 'لم تصل بعد',
-                emoji: '⏳',
-                isSelected:
-                    controller.transferStatus.value == TransferStatus.pending,
-                selectedColor: kPendingColor,
-                onTap: () => controller.selectStatus(TransferStatus.pending),
-              ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatusOption(
+              label: 'لم تصل بعد',
+              emoji: '⏳',
+              isSelected: controller.transferStatus.value == "pending",
+              selectedColor: kPendingColor,
+              onTap: () => controller.selectStatus("pending"),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -294,9 +299,7 @@ class _StatusOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? selectedColor.withOpacity(0.08)
-              : kCardColor,
+          color: isSelected ? selectedColor.withOpacity(0.08) : kCardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? selectedColor : kDividerColor,
@@ -308,8 +311,7 @@ class _StatusOption extends StatelessWidget {
             '$emoji $label',
             style: AppTextStyles.bodySmall.copyWith(
               color: isSelected ? selectedColor : kSecondaryTextColor,
-              fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ),
@@ -335,10 +337,31 @@ class _NotesField extends GetView<AddTransferController> {
         style: AppTextStyles.bodySmall.copyWith(color: kPrimaryTextColor),
         decoration: InputDecoration(
           hintText: 'أضف ملاحظة...',
-          hintStyle:
-              AppTextStyles.bodySmall.copyWith(color: kHintColor),
+          hintStyle: AppTextStyles.bodySmall.copyWith(color: kHintColor),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(14),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Add Account Button ───────────────────────────────────────
+class _AddAccountButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        // انتظر لما يرجع من شاشة الإضافة
+        await Get.toNamed(AppRoutes.addAccount);
+      },
+      child: Center(
+        child: Text(
+          '+ إضافة حساب جديد',
+          style: AppTextStyles.bodySmall.copyWith(
+            color: kAccentColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

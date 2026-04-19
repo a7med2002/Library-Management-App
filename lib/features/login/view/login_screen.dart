@@ -13,8 +13,6 @@ class LoginScreen extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     Get.put(LoginController());
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: kPrimaryColor,
       body: Column(

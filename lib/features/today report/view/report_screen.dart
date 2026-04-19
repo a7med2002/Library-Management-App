@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
 import 'package:library_managment/Core/Widgets/app_primary_button.dart';
-import '../controller/report_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../widgets/report_stat_card.dart';
-import '../widgets/account_breakdown_item.dart';
+import 'package:library_managment/features/today%20report/controller/report_controller.dart';
+import 'package:library_managment/features/today%20report/widgets/account_breakdown_item.dart';
+import 'package:library_managment/features/today%20report/widgets/report_stat_card.dart';
+
 
 class ReportScreen extends GetView<ReportController> {
   const ReportScreen({super.key});

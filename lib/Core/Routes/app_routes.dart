@@ -12,4 +12,5 @@ class AppRoutes {
   static const addPayment = '/add-payment';
   static const addTransfer = '/add-transfer';
   static const main = '/main';
+  static const addAccount = '/add-account';
 }

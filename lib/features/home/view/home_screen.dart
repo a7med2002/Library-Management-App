@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+import 'package:library_managment/Core/Routes/app_routes.dart';
 import 'package:library_managment/Core/Widgets/quick_action_button.dart';
 import 'package:library_managment/Core/Widgets/summary_card.dart';
-import 'package:library_managment/Core/Widgets/transaction_list_item.dart';
-import '../controller/home_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/routes/app_routes.dart';
+import 'package:library_managment/features/home/controller/home_controller.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -177,7 +176,7 @@ class _QuickActions extends StatelessWidget {
                 label: 'تسجيل دفعة',
                 icon: Icons.add_rounded,
                 iconColor: kAccentColor,
-                onTap: () => Get.toNamed(AppRoutes.home),
+                onTap: () => Get.toNamed(AppRoutes.addPayment),
               ),
             ),
             const SizedBox(width: 12),
@@ -186,7 +185,7 @@ class _QuickActions extends StatelessWidget {
                 label: 'إضافة حوالة',
                 icon: Icons.arrow_downward_rounded,
                 iconColor: kSuccessColor,
-                onTap: () => Get.toNamed(AppRoutes.home),
+                onTap: () => Get.toNamed(AppRoutes.addTransfer),
               ),
             ),
           ],
@@ -227,22 +226,131 @@ class _RecentTransactions extends GetView<HomeController> {
       children: [
         Text('آخر العمليات', style: AppTextStyles.titleMedium),
         const SizedBox(height: 12),
-        Obx(
-          () => ListView.separated(
+        Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: kAccentColor),
+            );
+          }
+          if (controller.recentTransactions.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'لا توجد عمليات اليوم',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: kSecondaryTextColor,
+                  ),
+                ),
+              ),
+            );
+          }
+          return ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: controller.recentTransactions.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (_, index) {
               final tx = controller.recentTransactions[index];
-              return TransactionListItem(
-                transaction: tx,
-                time: controller.formatTime(tx.date),
-              );
+              return _TransactionCard(tx: tx);
             },
-          ),
-        ),
+          );
+        }),
       ],
+    );
+  }
+}
+
+class _TransactionCard extends GetView<HomeController> {
+  final Map<String, dynamic> tx;
+  const _TransactionCard({required this.tx});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: kCardColor,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Icon
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: controller.getIconBgColor(tx),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              controller.getTransactionIcon(tx),
+              color: controller.getIconColor(tx),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Name & Time
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tx['customerName'] ?? tx['senderName'] ?? '',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: kPrimaryTextColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  controller.formatTime(tx['createdAt']),
+                  style: AppTextStyles.caption,
+                ),
+              ],
+            ),
+          ),
+          // Amount & Status
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '₪ ${(tx['amount'] as num).toStringAsFixed(2)}',
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: controller.isReceived(tx)
+                      ? kSuccessColor.withOpacity(0.12)
+                      : kPendingColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  controller.isReceived(tx) ? '✅ واصلة' : '⏳ معلقة',
+                  style: AppTextStyles.caption.copyWith(
+                    color: controller.isReceived(tx)
+                        ? kSuccessColor
+                        : kPendingColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

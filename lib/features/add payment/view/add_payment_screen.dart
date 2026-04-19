@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/Core/Constants/app_colors.dart';
+import 'package:library_managment/Core/Constants/app_text_styles.dart';
+import 'package:library_managment/Core/Routes/app_routes.dart';
 import 'package:library_managment/Core/Widgets/app_primary_button.dart';
 import 'package:library_managment/Core/Widgets/app_text_field.dart';
+import 'package:library_managment/core/models/receiving_account_model.dart';
+import 'package:library_managment/features/add%20payment/controller/add_payment_controller.dart';
 import 'package:library_managment/features/payment/model/payment_model.dart';
-import '../controller/add_payment_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../../core/models/receiving_account_model.dart';
 
 
 class AddPaymentScreen extends GetView<AddPaymentController> {
@@ -331,7 +331,10 @@ class _AddAccountButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.addPayment),
+      onTap: () async {
+        // انتظر لما يرجع من شاشة الإضافة
+        await Get.toNamed(AppRoutes.addAccount);
+      },
       child: Center(
         child: Text(
           '+ إضافة حساب جديد',

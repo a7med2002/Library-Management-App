@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/features/transfers/model/transfer_model.dart';
 import '../../../core/models/receiving_account_model.dart';
+import '../../../core/services/firestore_service.dart';
 
 class AddTransferController extends GetxController {
   final senderNameController = TextEditingController();
@@ -9,18 +9,31 @@ class AddTransferController extends GetxController {
   final amountController = TextEditingController();
   final notesController = TextEditingController();
 
-  final Rx<ReceivingAccountModel?> selectedAccount =
-      Rx<ReceivingAccountModel?>(null);
-  final Rx<TransferStatus> transferStatus = TransferStatus.received.obs;
+  final Rx<ReceivingAccountModel?> selectedAccount = Rx<ReceivingAccountModel?>(
+    null,
+  );
+  final RxString transferStatus = 'pending'.obs;
+  final RxList<ReceivingAccountModel> accounts = <ReceivingAccountModel>[].obs;
   final RxBool isLoading = false.obs;
 
-  final List<ReceivingAccountModel> accounts = AppAccounts.all;
+  @override
+  void onInit() {
+    super.onInit();
+    _listenAccounts();
+  }
+
+  void _listenAccounts() {
+    FirestoreService.accountsStream().listen((list) {
+      accounts.value = list;
+    });
+  }
 
   void selectAccount(ReceivingAccountModel account) =>
       selectedAccount.value = account;
 
-  void selectStatus(TransferStatus status) =>
-      transferStatus.value = status;
+  void selectStatus(String status) {
+    transferStatus.value = status;
+  }
 
   Future<void> submitTransfer() async {
     if (senderNameController.text.trim().isEmpty) {
@@ -42,7 +55,15 @@ class AddTransferController extends GetxController {
 
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 1)); // TODO: Firebase
+      await FirestoreService.addTransfer({
+        'senderName': senderNameController.text.trim(),
+        'referenceNumber': referenceNumberController.text.trim(),
+        'amount': double.parse(amountController.text.trim()),
+        'accountId': selectedAccount.value!.id,
+        'accountName': selectedAccount.value!.name,
+        'status': transferStatus.value.toString(),
+        'notes': notesController.text.trim(),
+      });
       Get.back();
       Get.snackbar(
         '',
@@ -53,22 +74,23 @@ class AddTransferController extends GetxController {
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
       );
+    } catch (e) {
+      debugPrint('❌ Transfer Error: $e');
+      _showError('حدث خطأ، حاول مجدداً');
     } finally {
       isLoading.value = false;
     }
   }
 
-  void _showError(String msg) {
-    Get.snackbar(
-      '',
-      msg,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.shade50,
-      colorText: Colors.red.shade800,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-    );
-  }
+  void _showError(String msg) => Get.snackbar(
+    '',
+    msg,
+    snackPosition: SnackPosition.BOTTOM,
+    backgroundColor: Colors.red.shade50,
+    colorText: Colors.red.shade800,
+    margin: const EdgeInsets.all(16),
+    borderRadius: 12,
+  );
 
   @override
   void onClose() {
