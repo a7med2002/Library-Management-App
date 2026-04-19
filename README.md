@@ -50,10 +50,9 @@ It provides tools for managing users, books, and transactions with support for *
 ## 📂 Folder Structure
     library_managment/
     │
-    ├── android/              # Android-specific configuration
-    ├── ios/                  # iOS-specific configuration
     ├── lib/
     │   ├── Core/             # Routes, Services, Models
+    │   ├── features/         # model, view, controller
     │   ├── firebase_options.dart
     │   ├── main.dart         # Entry point
     │   ├── objectbox-model.json
@@ -61,8 +60,7 @@ It provides tools for managing users, books, and transactions with support for *
     ├── assets/
     │   ├── fonts/            # Custom fonts (Tajawal)
     │   └── images/           # App images/icons
-    ├── pubspec.yaml          # Dependencies
-    └── analysis_options.yaml # Linting rules
+    └── pubspec.yaml          # Dependencies
 
 ---
 
