@@ -1,29 +1,28 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/features/transfers/model/transfer_model.dart';
 import '../../../core/services/firestore_service.dart';
 
 enum TransferFilter { all, received, pending }
 
 class TransfersController extends GetxController {
-  RxList<TransferModel> allTransfers = <TransferModel>[].obs;
-  RxList<TransferModel> filteredTransfers = <TransferModel>[].obs;
+  final RxList<Map<String, dynamic>> allTransfers =
+      <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> filteredTransfers =
+      <Map<String, dynamic>>[].obs;
   final RxString searchQuery = ''.obs;
   final Rx<TransferFilter> activeFilter = TransferFilter.all.obs;
+
+  StreamSubscription? _subscription;
 
   @override
   void onInit() {
     super.onInit();
-    _listenTransfers();
-  }
-
-  void _listenTransfers() {
-    FirestoreService.transfersStream().listen((list) {
-      allTransfers.value = list.map((e) {
-        return TransferModel.fromMap(e, e['id']);
-      }).toList();
-
+    _subscription = FirestoreService.transfersStream().listen((list) {
+      allTransfers.value = list;
       _applyFilter();
-    });
+    }, onError: (e) => debugPrint('❌ Transfers stream error: $e'));
   }
 
   void onSearchChanged(String query) {
@@ -37,24 +36,22 @@ class TransfersController extends GetxController {
   }
 
   void _applyFilter() {
-    List<TransferModel> result = List.from(allTransfers);
+    List<Map<String, dynamic>> result = List.from(allTransfers);
 
     if (searchQuery.value.isNotEmpty) {
       result = result
           .where(
             (t) =>
-                t.senderName.contains(searchQuery.value) ||
-                t.referenceNumber.contains(searchQuery.value),
+                (t['senderName'] ?? '').contains(searchQuery.value) ||
+                (t['referenceNumber'] ?? '').contains(searchQuery.value),
           )
           .toList();
     }
 
     if (activeFilter.value == TransferFilter.received) {
-      result = result
-          .where((t) => t.status == TransferStatus.received)
-          .toList();
+      result = result.where((t) => t['status'] == 'received').toList();
     } else if (activeFilter.value == TransferFilter.pending) {
-      result = result.where((t) => t.status == TransferStatus.pending).toList();
+      result = result.where((t) => t['status'] == 'pending').toList();
     }
 
     filteredTransfers.value = result;
@@ -75,5 +72,11 @@ class TransfersController extends GetxController {
     return '${date.day.toString().padLeft(2, '0')}/'
         '${date.month.toString().padLeft(2, '0')}/'
         '${date.year}';
+  }
+
+  @override
+  void onClose() {
+    _subscription?.cancel();
+    super.onClose();
   }
 }

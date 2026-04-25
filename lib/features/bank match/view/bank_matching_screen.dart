@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/Core/Widgets/app_primary_button.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/core/Widgets/app_primary_button.dart';
 import 'package:library_managment/core/models/receiving_account_model.dart';
 import 'package:library_managment/features/bank%20match/controller/bank_matching_controller.dart';
 import 'package:library_managment/features/bank%20match/widgets/match_result_item.dart';
@@ -79,10 +79,7 @@ class _UploadStep extends GetView<BankMatchingController> {
         children: [
           StepIndicator(currentStep: 1),
           const SizedBox(height: 24),
-          UploadBox(
-            fileName: controller.fileName,
-            onTap: controller.pickFile,
-          ),
+          UploadBox(fileName: controller.fileName, onTap: controller.pickFile),
           const SizedBox(height: 24),
           // Account Selector
           Align(
@@ -107,41 +104,45 @@ class _UploadStep extends GetView<BankMatchingController> {
 class _AccountDropdown extends GetView<BankMatchingController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: kCardColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: kDividerColor),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<ReceivingAccountModel>(
-              isExpanded: true,
-              value: controller.selectedAccount.value,
-              hint: Text(
-                'اختر الحساب',
-                style: AppTextStyles.bodySmall.copyWith(color: kHintColor),
-              ),
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: kSecondaryTextColor,
-              ),
-              items: controller.accounts
-                  .map((account) => DropdownMenuItem(
-                        value: account,
-                        child: Text(
-                          account.name,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: kPrimaryTextColor,
-                          ),
-                          textAlign: TextAlign.right,
-                        ),
-                      ))
-                  .toList(),
-              onChanged: controller.selectAccount,
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: kCardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: kDividerColor),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<ReceivingAccountModel>(
+            isExpanded: true,
+            value: controller.selectedAccount.value,
+            hint: Text(
+              'اختر الحساب',
+              style: AppTextStyles.bodySmall.copyWith(color: kHintColor),
             ),
+            icon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: kSecondaryTextColor,
+            ),
+            items: controller.accounts
+                .map(
+                  (account) => DropdownMenuItem(
+                    value: account,
+                    child: Text(
+                      account.name,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: kPrimaryTextColor,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: controller.selectAccount,
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -157,10 +158,7 @@ class _ProcessingStep extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(
-                  color: kAccentColor,
-                  strokeWidth: 3,
-                ),
+                CircularProgressIndicator(color: kAccentColor, strokeWidth: 3),
                 SizedBox(height: 24),
                 Text(
                   'جاري تحليل الكشف ومطابقة الحوالات...',
@@ -194,11 +192,14 @@ class _ResultsStep extends GetView<BankMatchingController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Summary
-                Obx(() => _ResultSummary(
-                      matched: controller.matchedList.length,
-                      total: controller.matchedList.length +
-                          controller.unmatchedList.length,
-                    )),
+                Obx(
+                  () => _ResultSummary(
+                    matched: controller.matchedList.length,
+                    total:
+                        controller.matchedList.length +
+                        controller.unmatchedList.length,
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Matched
@@ -218,10 +219,7 @@ class _ResultsStep extends GetView<BankMatchingController> {
                       ...controller.matchedList.map(
                         (item) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: MatchResultItem(
-                            item: item,
-                            isMatched: true,
-                          ),
+                          child: MatchResultItem(item: item, isMatched: true),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -246,10 +244,7 @@ class _ResultsStep extends GetView<BankMatchingController> {
                       ...controller.unmatchedList.map(
                         (item) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: MatchResultItem(
-                            item: item,
-                            isMatched: false,
-                          ),
+                          child: MatchResultItem(item: item, isMatched: false),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -258,11 +253,13 @@ class _ResultsStep extends GetView<BankMatchingController> {
                 }),
 
                 // Apply Button
-                Obx(() => AppPrimaryButton(
-                      label: 'تطبيق التحديثات',
-                      isLoading: controller.isLoading.value,
-                      onTap: controller.applyUpdates,
-                    )),
+                Obx(
+                  () => AppPrimaryButton(
+                    label: 'تطبيق التحديثات',
+                    isLoading: controller.isLoading.value,
+                    onTap: controller.applyUpdates,
+                  ),
+                ),
                 const SizedBox(height: 12),
 
                 // Reset Button

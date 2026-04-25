@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/core/Services/notification_service.dart';
 import '../../../core/models/receiving_account_model.dart';
 import '../../../core/services/firestore_service.dart';
 
@@ -64,6 +65,15 @@ class AddTransferController extends GetxController {
         'status': transferStatus.value.toString(),
         'notes': notesController.text.trim(),
       });
+
+      // ✅ أرسل إشعار
+      await NotificationService.notifyTransferAdded(
+        senderName: senderNameController.text.trim(),
+        amount: double.parse(amountController.text.trim()),
+        accountName: selectedAccount.value!.name,
+        status: transferStatus.value,
+      );
+
       Get.back();
       Get.snackbar(
         '',

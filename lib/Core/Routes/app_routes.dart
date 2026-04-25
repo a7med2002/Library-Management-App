@@ -13,4 +13,7 @@ class AppRoutes {
   static const addTransfer = '/add-transfer';
   static const main = '/main';
   static const addAccount = '/add-account';
+  static const transferDetail = '/transfer-detail';
+  static const outgoingTransfers = '/outgoing-transfers';
+  static const addOutgoingTransfer = '/add-outgoing-transfer';
 }

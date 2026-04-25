@@ -1,42 +1,28 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/features/payment/model/payment_model.dart';
-import '../../../core/services/firestore_service.dart';
+import 'package:library_managment/core/services/firestore_service.dart';
 
 enum PaymentFilter { today, thisWeek, custom }
 
 class PaymentsController extends GetxController {
-  // final RxList<Map<String, dynamic>> allPayments =
-  //     <Map<String, dynamic>>[].obs;
-  // final RxList<Map<String, dynamic>> filteredPayments =
-  //     <Map<String, dynamic>>[].obs;
-  RxList<PaymentModel> allPayments = <PaymentModel>[].obs;
-  RxList<PaymentModel> filteredPayments = <PaymentModel>[].obs;
+  RxList<Map<String, dynamic>> allPayments = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> filteredPayments = <Map<String, dynamic>>[].obs;
   final RxString searchQuery = ''.obs;
   final Rx<PaymentFilter> activeFilter = PaymentFilter.today.obs;
   final Rx<DateTime> selectedDate = DateTime.now().obs;
+  StreamSubscription? _subscription;
 
   @override
   void onInit() {
     super.onInit();
-    _listenPayments();
-  }
-
-  // void _listenPayments() {
-  //   FirestoreService.paymentsStream(selectedDate.value).listen((list) {
-  //     allPayments.value = list;
-  //     _applyFilter();
-  //   });
-  // }
-
-  void _listenPayments() {
-    FirestoreService.paymentsStream(selectedDate.value).listen((list) {
-      allPayments.value = list.map((e) {
-        return PaymentModel.fromMap(e, e['id']);
-      }).toList();
-
+    _subscription = FirestoreService.paymentsStream(DateTime.now()).listen((
+      list,
+    ) {
+      allPayments.value = list;
       _applyFilter();
-    });
+    }, onError: (e) => debugPrint('Stream error: $e'));
   }
 
   void onSearchChanged(String query) {
@@ -49,25 +35,33 @@ class PaymentsController extends GetxController {
     _applyFilter();
   }
 
-  // void _applyFilter() {
-  //   List<Map<String, dynamic>> result = List.from(allPayments);
-  //   if (searchQuery.value.isNotEmpty) {
-  //     result = result
-  //         .where(
-  //           (p) => (p['customerName'] as String).contains(searchQuery.value),
-  //         )
-  //         .toList();
-  //   }
-  //   filteredPayments.value = result;
-  // }
-
   void _applyFilter() {
-    List<PaymentModel> result = List.from(allPayments);
+    List<Map<String, dynamic>> result = List.from(allPayments);
 
     if (searchQuery.value.isNotEmpty) {
       result = result
-          .where((p) => p.customerName.contains(searchQuery.value))
+          .where((p) => (p['customerName'] ?? '').contains(searchQuery.value))
           .toList();
+    }
+
+    // فلتر التاريخ
+    if (activeFilter.value == PaymentFilter.today) {
+      final now = DateTime.now();
+      result = result.where((p) {
+        final timestamp = p['createdAt'];
+        if (timestamp == null) return false;
+        final date = timestamp.toDate();
+        return date.day == now.day &&
+            date.month == now.month &&
+            date.year == now.year;
+      }).toList();
+    } else if (activeFilter.value == PaymentFilter.thisWeek) {
+      final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+      result = result.where((p) {
+        final timestamp = p['createdAt'];
+        if (timestamp == null) return false;
+        return timestamp.toDate().isAfter(weekAgo);
+      }).toList();
     }
 
     filteredPayments.value = result;
@@ -104,5 +98,11 @@ class PaymentsController extends GetxController {
       default:
         return 'خدمة أخرى';
     }
+  }
+
+  @override
+  void onClose() {
+    _subscription?.cancel();
+    super.onClose();
   }
 }

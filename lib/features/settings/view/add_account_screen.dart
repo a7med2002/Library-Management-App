@@ -47,11 +47,13 @@ class AddAccountScreen extends GetView<AccountsController> {
                   _AccountTypeSelector(),
                   const SizedBox(height: 32),
 
-                  Obx(() => AppPrimaryButton(
-                        label: 'إضافة الحساب',
-                        isLoading: controller.isLoading.value,
-                        onTap: controller.addAccount,
-                      )),
+                  Obx(
+                    () => AppPrimaryButton(
+                      label: 'إضافة الحساب',
+                      isLoading: controller.isLoading.value,
+                      onTap: controller.addAccount,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -79,8 +81,11 @@ class _Header extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => Get.back(),
-            child: const Icon(Icons.arrow_forward_ios_rounded,
-                color: kPrimaryTextColor, size: 20),
+            child: const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: kPrimaryTextColor,
+              size: 20,
+            ),
           ),
           Text('إضافة حساب جديد', style: AppTextStyles.titleMedium),
           const SizedBox(width: 20),
@@ -111,31 +116,29 @@ class _SectionLabel extends StatelessWidget {
 class _AccountTypeSelector extends GetView<AccountsController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Row(
-          children: [
-            Expanded(
-              child: _TypeOption(
-                label: 'بنك',
-                icon: Icons.account_balance_rounded,
-                isSelected:
-                    controller.selectedType.value == AccountType.bank,
-                onTap: () =>
-                    controller.selectedType.value = AccountType.bank,
-              ),
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: _TypeOption(
+              label: 'بنك',
+              icon: Icons.account_balance_rounded,
+              isSelected: controller.selectedType.value == AccountType.bank,
+              onTap: () => controller.selectedType.value = AccountType.bank,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _TypeOption(
-                label: 'محفظة رقمية',
-                icon: Icons.account_balance_wallet_rounded,
-                isSelected:
-                    controller.selectedType.value == AccountType.wallet,
-                onTap: () =>
-                    controller.selectedType.value = AccountType.wallet,
-              ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _TypeOption(
+              label: 'محفظة رقمية',
+              icon: Icons.account_balance_wallet_rounded,
+              isSelected: controller.selectedType.value == AccountType.wallet,
+              onTap: () => controller.selectedType.value = AccountType.wallet,
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -160,9 +163,7 @@ class _TypeOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? kPrimaryColor.withOpacity(0.08)
-              : kCardColor,
+          color: isSelected ? kPrimaryColor.withOpacity(0.08) : kCardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? kPrimaryColor : kDividerColor,
@@ -181,9 +182,7 @@ class _TypeOption extends StatelessWidget {
               label,
               style: AppTextStyles.bodySmall.copyWith(
                 color: isSelected ? kPrimaryColor : kSecondaryTextColor,
-                fontWeight: isSelected
-                    ? FontWeight.w600
-                    : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ],

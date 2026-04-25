@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import 'package:library_managment/Core/Widgets/quick_action_button.dart';
-import 'package:library_managment/Core/Widgets/summary_card.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Widgets/quick_action_button.dart';
+import 'package:library_managment/core/Widgets/summary_card.dart';
 import 'package:library_managment/features/home/controller/home_controller.dart';
 
 class HomeScreen extends GetView<HomeController> {
@@ -78,7 +78,13 @@ class _HomeHeader extends GetView<HomeController> {
         right: 16,
         left: 16,
       ),
-      decoration: const BoxDecoration(color: kPrimaryColor),
+      decoration: const BoxDecoration(
+        color: kPrimaryColor,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
       child: Column(
         children: [
           // ── Row: Logo + Name | Date ──────────────────
@@ -130,26 +136,56 @@ class _HomeHeader extends GetView<HomeController> {
 
           // ── Summary Cards داخل الهيدر ────────────────
           Obx(
-            () => Row(
+            () => Column(
               children: [
-                Expanded(
-                  child: SummaryCard(
-                    title: 'إجمالي اليوم',
-                    value:
-                        '₪ ${controller.todayTotal.value.toStringAsFixed(0)}',
-                    icon: Icons.credit_card_rounded,
-                    iconColor: kAccentColor,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SummaryCard(
+                        title: 'إجمالي المصروفات',
+                        value:
+                            '₪ ${controller.todayOutgoing.value.toStringAsFixed(0)}',
+                        icon: Icons.arrow_upward_rounded,
+                        iconColor: kErrorColor,
+                        valueColor: kErrorColor,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SummaryCard(
+                        title: 'إجمالي الوارد',
+                        value:
+                            '₪ ${controller.todayTotal.value.toStringAsFixed(0)}',
+                        icon: Icons.arrow_downward_rounded,
+                        iconColor: kSuccessColor,
+                        valueColor: kSuccessColor,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SummaryCard(
-                    title: 'حوالات معلقة',
-                    value: controller.pendingTransfers.value.toString(),
-                    icon: Icons.swap_horiz_rounded,
-                    iconColor: kPendingColor,
-                    valueColor: kPendingColor,
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SummaryCard(
+                        title: 'حوالات معلقة',
+                        value: controller.pendingTransfers.value.toString(),
+                        icon: Icons.swap_horiz_rounded,
+                        iconColor: kPendingColor,
+                        valueColor: kPendingColor,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SummaryCard(
+                        title: 'إجمالي اليوم',
+                        value:
+                            '₪ ${(controller.todayTotal.value - controller.todayOutgoing.value).toStringAsFixed(0)}',
+                        icon: Icons.credit_card_rounded,
+                        iconColor: kAccentColor,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -267,6 +303,8 @@ class _TransactionCard extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final isOutgoing = tx['transactionType'] == 'outgoing';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -282,7 +320,7 @@ class _TransactionCard extends GetView<HomeController> {
       ),
       child: Row(
         children: [
-          // Icon
+          // ── Icon ─────────────────────────────────────
           Container(
             width: 40,
             height: 40,
@@ -297,13 +335,17 @@ class _TransactionCard extends GetView<HomeController> {
             ),
           ),
           const SizedBox(width: 12),
-          // Name & Time
+
+          // ── Name & Time ───────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tx['customerName'] ?? tx['senderName'] ?? '',
+                  // الصادرة بتعرض اسم المستلم، غيرها اسم الزبون/المحوّل
+                  isOutgoing
+                      ? (tx['recipientName'] ?? '')
+                      : (tx['customerName'] ?? tx['senderName'] ?? ''),
                   style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: kPrimaryTextColor,
@@ -317,32 +359,32 @@ class _TransactionCard extends GetView<HomeController> {
               ],
             ),
           ),
-          // Amount & Status
+
+          // ── Amount & Badge ────────────────────────────
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              // المبلغ — الصادرة بعلامة ناقص
               Text(
-                '₪ ${(tx['amount'] as num).toStringAsFixed(2)}',
+                '${isOutgoing ? '-' : '+'} ₪ ${(tx['amount'] as num).toStringAsFixed(2)}',
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: kPrimaryTextColor,
+                  color: controller.getIconColor(tx),
                 ),
               ),
               const SizedBox(height: 4),
+
+              // Badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: controller.isReceived(tx)
-                      ? kSuccessColor.withOpacity(0.12)
-                      : kPendingColor.withOpacity(0.12),
+                  color: controller.getBadgeBgColor(tx),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  controller.isReceived(tx) ? '✅ واصلة' : '⏳ معلقة',
+                  controller.getBadgeLabel(tx),
                   style: AppTextStyles.caption.copyWith(
-                    color: controller.isReceived(tx)
-                        ? kSuccessColor
-                        : kPendingColor,
+                    color: controller.getBadgeColor(tx),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

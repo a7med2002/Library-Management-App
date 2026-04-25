@@ -27,9 +27,7 @@ class StepIndicator extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 2,
-                      color: isDone || isActive
-                          ? kAccentColor
-                          : kDividerColor,
+                      color: isDone || isActive ? kAccentColor : kDividerColor,
                     ),
                   ),
                 Column(
@@ -43,8 +41,8 @@ class StepIndicator extends StatelessWidget {
                         color: isActive
                             ? kAccentColor
                             : isDone
-                                ? kSuccessColor
-                                : kDividerColor,
+                            ? kSuccessColor
+                            : kDividerColor,
                       ),
                       child: Center(
                         child: isDone
@@ -68,9 +66,7 @@ class StepIndicator extends StatelessWidget {
                     Text(
                       label,
                       style: AppTextStyles.caption.copyWith(
-                        color: isActive
-                            ? kAccentColor
-                            : kSecondaryTextColor,
+                        color: isActive ? kAccentColor : kSecondaryTextColor,
                         fontWeight: isActive
                             ? FontWeight.w600
                             : FontWeight.normal,

@@ -154,7 +154,7 @@ class _PaymentsList extends GetView<PaymentsController> {
           final payment = controller.filteredPayments[index];
           return PaymentListItem(
             payment: payment,
-            time: controller.formatTime(payment.date),
+            time: controller.formatTime(payment['createdAt']),
           );
         },
       );

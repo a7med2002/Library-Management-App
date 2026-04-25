@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import 'package:library_managment/Core/Services/objectbox_service.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/services/firestore_service.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Services/auth_service.dart';
+import 'package:library_managment/core/Services/firestore_service.dart';
 
 class HomeController extends GetxController {
   final RxString employeeName = ''.obs;
@@ -13,6 +15,16 @@ class HomeController extends GetxController {
       <Map<String, dynamic>>[].obs;
   final RxBool isLoading = false.obs;
 
+  List<Map<String, dynamic>> _lastPayments = [];
+  List<Map<String, dynamic>> _lastTransfers = [];
+
+  final RxDouble todayOutgoing = 0.0.obs;
+  List<Map<String, dynamic>> _lastOutgoing = [];
+
+  StreamSubscription? _paymentsSubscription;
+  StreamSubscription? _transfersSubscription;
+  StreamSubscription? _outgoingSubscription;
+
   @override
   void onInit() {
     super.onInit();
@@ -21,8 +33,6 @@ class HomeController extends GetxController {
 
   Future<void> _initialize() async {
     try {
-      // تأكد إن ObjectBox جاهز
-      await ObjectBoxService.init();
       _loadUser();
       _listenTodayData();
     } catch (e) {
@@ -40,22 +50,32 @@ class HomeController extends GetxController {
   void _listenTodayData() {
     final today = DateTime.now();
 
-    // ─── Payments listener ────────────────────────────
-    FirestoreService.paymentsStream(today).listen((payments) {
+    _paymentsSubscription = FirestoreService.paymentsStream(today).listen((
+      payments,
+    ) {
       _lastPayments = payments;
       _calculateTotal();
       _mergeRecentTransactions(payments: payments);
-    });
+    }, onError: (e) => debugPrint('Payments stream error: $e'));
 
-    // ─── Transfers listener ───────────────────────────
-    FirestoreService.transfersStream().listen((transfers) {
+    _transfersSubscription = FirestoreService.transfersStream().listen((
+      transfers,
+    ) {
       _lastTransfers = transfers;
       pendingTransfers.value = transfers
           .where((t) => t['status'] == 'pending')
           .length;
       _calculateTotal();
       _mergeRecentTransactions(transfers: transfers);
-    });
+    }, onError: (e) => debugPrint('Transfers stream error: $e'));
+
+    _outgoingSubscription = FirestoreService.outgoingTransfersStream().listen((
+      outgoing,
+    ) {
+      _lastOutgoing = outgoing;
+      _calculateOutgoing();
+      _mergeRecentTransactions(outgoing: outgoing);
+    }, onError: (e) => debugPrint('Outgoing stream error: $e'));
   }
 
   void _calculateTotal() {
@@ -86,22 +106,21 @@ class HomeController extends GetxController {
     todayTotal.value = paymentsTotal + transfersTotal;
   }
 
-  List<Map<String, dynamic>> _lastPayments = [];
-  List<Map<String, dynamic>> _lastTransfers = [];
-
   void _mergeRecentTransactions({
     List<Map<String, dynamic>>? payments,
     List<Map<String, dynamic>>? transfers,
+    List<Map<String, dynamic>>? outgoing,
   }) {
     if (payments != null) _lastPayments = payments;
     if (transfers != null) _lastTransfers = transfers;
+    if (outgoing != null) _lastOutgoing = outgoing;
 
     final all = [
       ..._lastPayments.map((p) => {...p, 'transactionType': 'payment'}),
       ..._lastTransfers.map((t) => {...t, 'transactionType': 'transfer'}),
+      ..._lastOutgoing.map((o) => {...o, 'transactionType': 'outgoing'}),
     ];
 
-    // رتّب حسب الأحدث
     all.sort((a, b) {
       final aDate = a['createdAt'];
       final bDate = b['createdAt'];
@@ -109,39 +128,116 @@ class HomeController extends GetxController {
       return bDate.compareTo(aDate);
     });
 
-    // خذ آخر 5
     recentTransactions.value = all.take(5).toList();
   }
 
+  void _calculateOutgoing() {
+    final today = DateTime.now();
+    final todayOutgoing = _lastOutgoing.where((t) {
+      final timestamp = t['createdAt'];
+      if (timestamp == null) return false;
+      final date = timestamp.toDate();
+      return date.day == today.day &&
+          date.month == today.month &&
+          date.year == today.year;
+    }).toList();
+
+    this.todayOutgoing.value = todayOutgoing.fold(
+      0.0,
+      (sum, t) => sum + (t['amount'] as num).toDouble(),
+    );
+  }
+
   IconData getTransactionIcon(Map<String, dynamic> tx) {
-    if (tx['transactionType'] == 'transfer') {
-      return Icons.swap_horiz_rounded;
-    }
-    switch (tx['serviceType']) {
-      case 'printing':
-        return Icons.print_rounded;
-      case 'photocopying':
-        return Icons.document_scanner_rounded;
+    switch (tx['transactionType']) {
+      case 'payment':
+        switch (tx['serviceType']) {
+          case 'printing':
+            return Icons.print_rounded;
+          case 'photocopying':
+            return Icons.document_scanner_rounded;
+          default:
+            return Icons.miscellaneous_services_rounded;
+        }
+      case 'transfer':
+        return Icons.arrow_downward_rounded; // وارد
+      case 'outgoing':
+        return Icons.arrow_upward_rounded; // صادر
       default:
-        return Icons.miscellaneous_services_rounded;
+        return Icons.swap_horiz_rounded;
     }
   }
 
   Color getIconColor(Map<String, dynamic> tx) {
-    return tx['transactionType'] == 'transfer'
-        ? const Color(0xff4CAF50)
-        : const Color(0xffC9A84C);
+    switch (tx['transactionType']) {
+      case 'payment':
+        return kAccentColor;
+      case 'transfer':
+        return kSuccessColor;
+      case 'outgoing':
+        return kErrorColor;
+      default:
+        return kSecondaryTextColor;
+    }
   }
 
   Color getIconBgColor(Map<String, dynamic> tx) {
-    return tx['transactionType'] == 'transfer'
-        ? const Color(0xffE8F5E9)
-        : const Color(0xffFFF3E0);
+    switch (tx['transactionType']) {
+      case 'payment':
+        return kIconBgPayment;
+      case 'transfer':
+        return kIconBgTransfer;
+      case 'outgoing':
+        return kErrorColor.withOpacity(0.1);
+      default:
+        return kBackgroundColor;
+    }
   }
 
-  bool isReceived(Map<String, dynamic> tx) {
+  bool? isReceived(Map<String, dynamic> tx) {
+    if (tx['transactionType'] == 'outgoing') return null;
     if (tx['transactionType'] == 'payment') return true;
     return tx['status'] == 'received';
+  }
+
+  // ✅ الـ badge label
+  String getBadgeLabel(Map<String, dynamic> tx) {
+    if (tx['transactionType'] == 'outgoing') {
+      return _categoryLabel(tx['category'] ?? '');
+    }
+    if (tx['transactionType'] == 'payment') return '✅ مدفوعة';
+    return tx['status'] == 'received' ? '✅ واصلة' : '⏳ معلقة';
+  }
+
+  Color getBadgeColor(Map<String, dynamic> tx) {
+    if (tx['transactionType'] == 'outgoing') return kErrorColor;
+    if (tx['transactionType'] == 'payment') return kSuccessColor;
+    return tx['status'] == 'received' ? kSuccessColor : kPendingColor;
+  }
+
+  Color getBadgeBgColor(Map<String, dynamic> tx) {
+    if (tx['transactionType'] == 'outgoing') {
+      return kErrorColor.withOpacity(0.1);
+    }
+    if (tx['transactionType'] == 'payment') {
+      return kSuccessColor.withOpacity(0.12);
+    }
+    return tx['status'] == 'received'
+        ? kSuccessColor.withOpacity(0.12)
+        : kPendingColor.withOpacity(0.12);
+  }
+
+  String _categoryLabel(String category) {
+    switch (category) {
+      case 'supplies':
+        return '🛍 مستلزمات';
+      case 'bills':
+        return '🧾 فواتير';
+      case 'salaries':
+        return '👥 رواتب';
+      default:
+        return '📦 أخرى';
+    }
   }
 
   String formatTime(dynamic timestamp) {
@@ -153,5 +249,13 @@ class HomeController extends GetxController {
     final m = date.minute.toString().padLeft(2, '0');
     final period = date.hour < 12 ? 'ص' : 'م';
     return '$hour:$m $period';
+  }
+
+  @override
+  void onClose() {
+    _paymentsSubscription?.cancel();
+    _transfersSubscription?.cancel();
+    _outgoingSubscription?.cancel();
+    super.onClose();
   }
 }

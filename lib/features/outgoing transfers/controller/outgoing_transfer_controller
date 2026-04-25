@@ -1,0 +1,33 @@
+import 'package:get/get.dart';
+import '../../../core/services/firestore_service.dart';
+
+class OutgoingTransfersController extends GetxController {
+  final RxList<Map<String, dynamic>> allList = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> filteredList = <Map<String, dynamic>>[].obs;
+  final RxString searchQuery = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    FirestoreService.outgoingTransfersStream().listen((list) {
+      allList.value = list;
+      _applyFilter();
+    });
+  }
+
+  void onSearchChanged(String query) {
+    searchQuery.value = query;
+    _applyFilter();
+  }
+
+  void _applyFilter() {
+    if (searchQuery.value.isEmpty) {
+      filteredList.value = allList;
+      return;
+    }
+    filteredList.value = allList
+        .where((item) => (item['recipientName'] ?? '')
+            .contains(searchQuery.value))
+        .toList();
+  }
+}

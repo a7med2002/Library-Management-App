@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/features/home/view/home_screen.dart';
+import 'package:library_managment/features/main/controller/main_wrapper_controller.dart';
+import 'package:library_managment/features/outgoing%20transfers/view/outgoing_transfer_screen.dart';
 import 'package:library_managment/features/payment/view/payments_screen.dart';
 import 'package:library_managment/features/settings/view/settings_screen.dart';
 import 'package:library_managment/features/transfers/view/transfers_screen.dart';
-import '../controller/main_wrapper_controller.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_text_styles.dart';
-import '../../home/view/home_screen.dart';
-
 
 class MainWrapper extends StatelessWidget {
   const MainWrapper({super.key});
@@ -15,6 +15,7 @@ class MainWrapper extends StatelessWidget {
   static final List<Widget> _pages = [
     const HomeScreen(),
     const TransfersScreen(),
+    const OutgoingTransfersScreen(),
     const PaymentsScreen(),
     const SettingsScreen(),
   ];
@@ -41,14 +42,12 @@ class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const _BottomNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   static const List<_NavItem> _items = [
     _NavItem(icon: Icons.home_rounded, label: 'الرئيسية'),
     _NavItem(icon: Icons.swap_horiz_rounded, label: 'الحوالات'),
+    _NavItem(icon: Icons.arrow_upward_rounded, label: 'الصادرة'),
     _NavItem(icon: Icons.credit_card_rounded, label: 'المدفوعات'),
     _NavItem(icon: Icons.settings_rounded, label: 'الإعدادات'),
   ];
@@ -127,8 +126,7 @@ class _NavBarItem extends StatelessWidget {
             item.label,
             style: AppTextStyles.caption.copyWith(
               color: isSelected ? kPrimaryColor : kSecondaryTextColor,
-              fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],

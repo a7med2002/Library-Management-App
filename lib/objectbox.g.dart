@@ -14,7 +14,7 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
-import 'Core/models/user_model.dart';
+import 'core/models/user_model.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(1, 9181546491676231322),
     name: 'UserModel',
-    lastPropertyId: const obx_int.IdUid(7, 6347555434872339072),
+    lastPropertyId: const obx_int.IdUid(8, 7158837754756097496),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -65,6 +65,12 @@ final _entities = <obx_int.ModelEntity>[
         id: const obx_int.IdUid(7, 6347555434872339072),
         name: 'lastLogin',
         type: 10,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 7158837754756097496),
+        name: 'storeId',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -143,7 +149,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         final nameOffset = fbb.writeString(object.name);
         final emailOffset = fbb.writeString(object.email);
         final photoUrlOffset = fbb.writeString(object.photoUrl);
-        fbb.startTable(8);
+        final storeIdOffset = fbb.writeString(object.storeId);
+        fbb.startTable(9);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, uidOffset);
         fbb.addOffset(2, nameOffset);
@@ -151,6 +158,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addOffset(4, photoUrlOffset);
         fbb.addBool(5, object.isLoggedIn);
         fbb.addInt64(6, object.lastLogin.millisecondsSinceEpoch);
+        fbb.addOffset(7, storeIdOffset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -181,6 +189,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           14,
           false,
         );
+        final storeIdParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 18, '');
         final lastLoginParam = DateTime.fromMillisecondsSinceEpoch(
           const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0),
         );
@@ -191,6 +202,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           email: emailParam,
           photoUrl: photoUrlParam,
           isLoggedIn: isLoggedInParam,
+          storeId: storeIdParam,
           lastLogin: lastLoginParam,
         );
 
@@ -237,5 +249,10 @@ class UserModel_ {
   /// See [UserModel.lastLogin].
   static final lastLogin = obx.QueryDateProperty<UserModel>(
     _entities[0].properties[6],
+  );
+
+  /// See [UserModel.storeId].
+  static final storeId = obx.QueryStringProperty<UserModel>(
+    _entities[0].properties[7],
   );
 }

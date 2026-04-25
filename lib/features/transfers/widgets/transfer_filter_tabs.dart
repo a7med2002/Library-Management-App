@@ -16,27 +16,29 @@ class TransferFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Row(
-          children: [
-            _Tab(
-              label: 'الكل',
-              isSelected: activeFilter.value == TransferFilter.all,
-              onTap: () => onChanged(TransferFilter.all),
-            ),
-            const SizedBox(width: 8),
-            _Tab(
-              label: '✅ واصلة',
-              isSelected: activeFilter.value == TransferFilter.received,
-              onTap: () => onChanged(TransferFilter.received),
-            ),
-            const SizedBox(width: 8),
-            _Tab(
-              label: '⏳ معلقة',
-              isSelected: activeFilter.value == TransferFilter.pending,
-              onTap: () => onChanged(TransferFilter.pending),
-            ),
-          ],
-        ));
+    return Obx(
+      () => Row(
+        children: [
+          _Tab(
+            label: 'الكل',
+            isSelected: activeFilter.value == TransferFilter.all,
+            onTap: () => onChanged(TransferFilter.all),
+          ),
+          const SizedBox(width: 8),
+          _Tab(
+            label: '✅ واصلة',
+            isSelected: activeFilter.value == TransferFilter.received,
+            onTap: () => onChanged(TransferFilter.received),
+          ),
+          const SizedBox(width: 8),
+          _Tab(
+            label: '⏳ معلقة',
+            isSelected: activeFilter.value == TransferFilter.pending,
+            onTap: () => onChanged(TransferFilter.pending),
+          ),
+        ],
+      ),
+    );
   }
 }
 

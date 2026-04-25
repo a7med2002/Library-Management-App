@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import 'package:library_managment/Core/Widgets/app_primary_button.dart';
-import 'package:library_managment/Core/Widgets/app_text_field.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Widgets/app_primary_button.dart';
+import 'package:library_managment/core/Widgets/app_text_field.dart';
 import 'package:library_managment/core/models/receiving_account_model.dart';
 import 'package:library_managment/features/add%20payment/controller/add_payment_controller.dart';
 import 'package:library_managment/features/payment/model/payment_model.dart';
-
 
 class AddPaymentScreen extends GetView<AddPaymentController> {
   const AddPaymentScreen({super.key});
@@ -72,11 +71,13 @@ class AddPaymentScreen extends GetView<AddPaymentController> {
                   const SizedBox(height: 24),
 
                   // ── زر التسجيل ───────────────────────
-                  Obx(() => AppPrimaryButton(
-                        label: 'تسجيل الدفعة',
-                        isLoading: controller.isLoading.value,
-                        onTap: controller.submitPayment,
-                      )),
+                  Obx(
+                    () => AppPrimaryButton(
+                      label: 'تسجيل الدفعة',
+                      isLoading: controller.isLoading.value,
+                      onTap: controller.submitPayment,
+                    ),
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -140,36 +141,37 @@ class _SectionLabel extends StatelessWidget {
 class _ServiceTypeSelector extends GetView<AddPaymentController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Row(
-          children: [
-            _ServiceChip(
-              label: 'طباعة',
-              icon: Icons.print_rounded,
-              type: ServiceType.printing,
-              isSelected:
-                  controller.selectedService.value == ServiceType.printing,
-              onTap: () => controller.selectService(ServiceType.printing),
-            ),
-            const SizedBox(width: 8),
-            _ServiceChip(
-              label: 'تصوير',
-              icon: Icons.document_scanner_rounded,
-              type: ServiceType.photocopying,
-              isSelected:
-                  controller.selectedService.value == ServiceType.photocopying,
-              onTap: () => controller.selectService(ServiceType.photocopying),
-            ),
-            const SizedBox(width: 8),
-            _ServiceChip(
-              label: 'خدمة أخرى',
-              icon: Icons.miscellaneous_services_rounded,
-              type: ServiceType.other,
-              isSelected:
-                  controller.selectedService.value == ServiceType.other,
-              onTap: () => controller.selectService(ServiceType.other),
-            ),
-          ],
-        ));
+    return Obx(
+      () => Row(
+        children: [
+          _ServiceChip(
+            label: 'طباعة',
+            icon: Icons.print_rounded,
+            type: ServiceType.printing,
+            isSelected:
+                controller.selectedService.value == ServiceType.printing,
+            onTap: () => controller.selectService(ServiceType.printing),
+          ),
+          const SizedBox(width: 8),
+          _ServiceChip(
+            label: 'تصوير',
+            icon: Icons.document_scanner_rounded,
+            type: ServiceType.photocopying,
+            isSelected:
+                controller.selectedService.value == ServiceType.photocopying,
+            onTap: () => controller.selectService(ServiceType.photocopying),
+          ),
+          const SizedBox(width: 8),
+          _ServiceChip(
+            label: 'خدمة أخرى',
+            icon: Icons.miscellaneous_services_rounded,
+            type: ServiceType.other,
+            isSelected: controller.selectedService.value == ServiceType.other,
+            onTap: () => controller.selectService(ServiceType.other),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -216,8 +218,7 @@ class _ServiceChip extends StatelessWidget {
                 label,
                 style: AppTextStyles.caption.copyWith(
                   color: isSelected ? kPrimaryColor : kSecondaryTextColor,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ],
@@ -232,18 +233,23 @@ class _ServiceChip extends StatelessWidget {
 class _AccountsList extends GetView<AddPaymentController> {
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Column(
-          children: controller.accounts
-              .map((account) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _AccountCard(
-                      account: account,
-                      isSelected: controller.selectedAccount.value?.id == account.id,
-                      onTap: () => controller.selectAccount(account),
-                    ),
-                  ))
-              .toList(),
-        ));
+    return Obx(
+      () => Column(
+        children: controller.accounts
+            .map(
+              (account) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _AccountCard(
+                  account: account,
+                  isSelected:
+                      controller.selectedAccount.value?.id == account.id,
+                  onTap: () => controller.selectAccount(account),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }
 
@@ -313,11 +319,7 @@ class _AccountCard extends StatelessWidget {
                 color: kBackgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                account.icon,
-                color: kPrimaryColor,
-                size: 22,
-              ),
+              child: Icon(account.icon, color: kPrimaryColor, size: 22),
             ),
           ],
         ),

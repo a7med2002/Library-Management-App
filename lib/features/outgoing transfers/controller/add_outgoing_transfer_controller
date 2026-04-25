@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../core/models/receiving_account_model.dart';
+import '../../../core/services/firestore_service.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/services/notification_service.dart';
+
+enum OutgoingCategory { supplies, bills, salaries, other }
+
+extension OutgoingCategoryEx on OutgoingCategory {
+  String get label {
+    switch (this) {
+      case OutgoingCategory.supplies: return 'مستلزمات';
+      case OutgoingCategory.bills: return 'فواتير';
+      case OutgoingCategory.salaries: return 'رواتب';
+      case OutgoingCategory.other: return 'أخرى';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case OutgoingCategory.supplies: return Icons.shopping_bag_rounded;
+      case OutgoingCategory.bills: return Icons.receipt_rounded;
+      case OutgoingCategory.salaries: return Icons.people_rounded;
+      case OutgoingCategory.other: return Icons.more_horiz_rounded;
+    }
+  }
+}
+
+class AddOutgoingTransferController extends GetxController {
+  final recipientNameController = TextEditingController();
+  final amountController = TextEditingController();
+  final notesController = TextEditingController();
+  final referenceController = TextEditingController();
+
+  final Rx<ReceivingAccountModel?> selectedAccount =
+      Rx<ReceivingAccountModel?>(null);
+  final Rx<OutgoingCategory> selectedCategory =
+      OutgoingCategory.supplies.obs;
+  final RxList<ReceivingAccountModel> accounts =
+      <ReceivingAccountModel>[].obs;
+  final RxBool isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    FirestoreService.accountsStream().listen((list) {
+      accounts.value = list;
+    });
+  }
+
+  void selectAccount(ReceivingAccountModel account) =>
+      selectedAccount.value = account;
+
+  void selectCategory(OutgoingCategory category) =>
+      selectedCategory.value = category;
+
+  Future<void> submit() async {
+    if (recipientNameController.text.trim().isEmpty) {
+      _showError('الرجاء إدخال اسم المستلم'); return;
+    }
+    if (amountController.text.trim().isEmpty) {
+      _showError('الرجاء إدخال المبلغ'); return;
+    }
+    if (selectedAccount.value == null) {
+      _showError('الرجاء اختيار الحساب'); return;
+    }
+
+    try {
+      isLoading.value = true;
+      await FirestoreService.addOutgoingTransfer({
+        'recipientName': recipientNameController.text.trim(),
+        'amount': double.parse(amountController.text.trim()),
+        'accountId': selectedAccount.value!.id,
+        'accountName': selectedAccount.value!.name,
+        'category': selectedCategory.value.name,
+        'notes': notesController.text.trim(),
+        'referenceNumber': referenceController.text.trim(),
+      });
+
+       // ✅ أرسل إشعار
+      await NotificationService.notifyOutgoingAdded(
+        recipientName: recipientNameController.text.trim(),
+        amount: double.parse(amountController.text.trim()),
+        category: selectedCategory.value.name,
+      );
+      
+      Get.back();
+      Get.snackbar('', 'تم تسجيل المصروف ✅',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade50,
+          colorText: Colors.green.shade800,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12);
+    } catch (e) {
+      debugPrint('❌ Error: $e');
+      _showError('حدث خطأ، حاول مجدداً');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _showError(String msg) => Get.snackbar('', msg,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.shade50,
+      colorText: Colors.red.shade800,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12);
+
+  @override
+  void onClose() {
+    recipientNameController.dispose();
+    amountController.dispose();
+    notesController.dispose();
+    referenceController.dispose();
+    super.onClose();
+  }
+}

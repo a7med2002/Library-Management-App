@@ -40,11 +40,11 @@ target_link_libraries(flutter INTERFACE "${FLUTTER_LIBRARY}.lib")
 add_dependencies(flutter flutter_assemble)
 
 # === Wrapper ===
-list(APPEND CPP_WRAPPER_SOURCES_CORE
+list(APPEND CPP_WRAPPER_SOURCES_core
   "core_implementations.cc"
   "standard_codec.cc"
 )
-list(TRANSFORM CPP_WRAPPER_SOURCES_CORE PREPEND "${WRAPPER_ROOT}/")
+list(TRANSFORM CPP_WRAPPER_SOURCES_core PREPEND "${WRAPPER_ROOT}/")
 list(APPEND CPP_WRAPPER_SOURCES_PLUGIN
   "plugin_registrar.cc"
 )
@@ -57,7 +57,7 @@ list(TRANSFORM CPP_WRAPPER_SOURCES_APP PREPEND "${WRAPPER_ROOT}/")
 
 # Wrapper sources needed for a plugin.
 add_library(flutter_wrapper_plugin STATIC
-  ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_core}
   ${CPP_WRAPPER_SOURCES_PLUGIN}
 )
 apply_standard_settings(flutter_wrapper_plugin)
@@ -73,7 +73,7 @@ add_dependencies(flutter_wrapper_plugin flutter_assemble)
 
 # Wrapper sources needed for the runner.
 add_library(flutter_wrapper_app STATIC
-  ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_core}
   ${CPP_WRAPPER_SOURCES_APP}
 )
 apply_standard_settings(flutter_wrapper_app)
@@ -91,7 +91,7 @@ set(PHONY_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/_phony_")
 set_source_files_properties("${PHONY_OUTPUT}" PROPERTIES SYMBOLIC TRUE)
 add_custom_command(
   OUTPUT ${FLUTTER_LIBRARY} ${FLUTTER_LIBRARY_HEADERS}
-    ${CPP_WRAPPER_SOURCES_CORE} ${CPP_WRAPPER_SOURCES_PLUGIN}
+    ${CPP_WRAPPER_SOURCES_core} ${CPP_WRAPPER_SOURCES_PLUGIN}
     ${CPP_WRAPPER_SOURCES_APP}
     ${PHONY_OUTPUT}
   COMMAND ${CMAKE_COMMAND} -E env
@@ -103,7 +103,7 @@ add_custom_command(
 add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"
   ${FLUTTER_LIBRARY_HEADERS}
-  ${CPP_WRAPPER_SOURCES_CORE}
+  ${CPP_WRAPPER_SOURCES_core}
   ${CPP_WRAPPER_SOURCES_PLUGIN}
   ${CPP_WRAPPER_SOURCES_APP}
 )

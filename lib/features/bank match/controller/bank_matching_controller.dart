@@ -11,15 +11,14 @@ enum MatchingStep { upload, processing, results }
 
 class BankMatchingController extends GetxController {
   final Rx<MatchingStep> currentStep = MatchingStep.upload.obs;
-  final Rx<ReceivingAccountModel?> selectedAccount =
-      Rx<ReceivingAccountModel?>(null);
+  final Rx<ReceivingAccountModel?> selectedAccount = Rx<ReceivingAccountModel?>(
+    null,
+  );
   final RxString fileName = ''.obs;
   final RxBool isLoading = false.obs;
-  final RxList<ReceivingAccountModel> accounts =
-      <ReceivingAccountModel>[].obs;
+  final RxList<ReceivingAccountModel> accounts = <ReceivingAccountModel>[].obs;
 
-  final RxList<BankTransactionModel> matchedList =
-      <BankTransactionModel>[].obs;
+  final RxList<BankTransactionModel> matchedList = <BankTransactionModel>[].obs;
   final RxList<BankTransactionModel> unmatchedList =
       <BankTransactionModel>[].obs;
 
@@ -43,8 +42,11 @@ class BankMatchingController extends GetxController {
 
   Future<void> pickFile() async {
     if (selectedAccount.value == null) {
-      Get.snackbar('', 'الرجاء اختيار الحساب البنكي أولاً',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        '',
+        'الرجاء اختيار الحساب البنكي أولاً',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -65,8 +67,9 @@ class BankMatchingController extends GetxController {
       isLoading.value = true;
 
       // 1. جلب الحوالات المعلقة
-      final allTransfers =
-          await FirestoreService.getTransfersByDate(DateTime.now());
+      final allTransfers = await FirestoreService.getTransfersByDate(
+        DateTime.now(),
+      );
       _pendingTransfers = allTransfers
           .where((t) => t['status'] == 'pending')
           .toList();
@@ -95,15 +98,15 @@ class BankMatchingController extends GetxController {
 
       for (final transfer in _pendingTransfers) {
         final ref = transfer['referenceNumber'] as String;
-        final isFound = bankRefs.any((bankRef) =>
-            bankRef.contains(ref) || ref.contains(bankRef));
+        final isFound = bankRefs.any(
+          (bankRef) => bankRef.contains(ref) || ref.contains(bankRef),
+        );
 
         final model = BankTransactionModel(
           referenceNumber: ref,
           amount: (transfer['amount'] as num).toDouble(),
           senderName: transfer['senderName'] as String,
-          status:
-              isFound ? MatchStatus.matched : MatchStatus.unmatched,
+          status: isFound ? MatchStatus.matched : MatchStatus.unmatched,
         );
 
         if (isFound) {
@@ -117,8 +120,11 @@ class BankMatchingController extends GetxController {
       unmatchedList.value = unmatched;
       currentStep.value = MatchingStep.results;
     } catch (e) {
-      Get.snackbar('', 'خطأ في قراءة الملف',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        '',
+        'خطأ في قراءة الملف',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       currentStep.value = MatchingStep.upload;
     } finally {
       isLoading.value = false;
@@ -130,20 +136,24 @@ class BankMatchingController extends GetxController {
       isLoading.value = true;
       for (final transfer in _pendingTransfers) {
         final ref = transfer['referenceNumber'] as String;
-        final isMatched = matchedList
-            .any((m) => m.referenceNumber == ref);
+        final isMatched = matchedList.any((m) => m.referenceNumber == ref);
         if (isMatched) {
           await FirestoreService.updateTransferStatus(
-              transfer['id'], 'received');
+            transfer['id'],
+            'received',
+          );
         }
       }
       Get.back();
-      Get.snackbar('', 'تم تحديث حالة الحوالات ✅',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.shade50,
-          colorText: Colors.green.shade800,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12);
+      Get.snackbar(
+        '',
+        'تم تحديث حالة الحوالات ✅',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade50,
+        colorText: Colors.green.shade800,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+      );
     } finally {
       isLoading.value = false;
     }

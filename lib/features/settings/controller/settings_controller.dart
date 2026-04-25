@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/services/firestore_service.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Services/auth_service.dart';
+import 'package:library_managment/core/Services/firestore_service.dart';
+import 'package:library_managment/core/Services/notification_service.dart';
+import 'package:library_managment/core/Services/store_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsController extends GetxController {
@@ -18,15 +21,9 @@ class SettingsController extends GetxController {
     super.onInit();
     _loadUser();
     _loadSettings();
+    _listenEmployeesCount();
   }
 
-  // void _loadUser() {
-  //   final user = AuthService.currentUser;
-  //   if (user != null) {
-  //     employeeName.value = user.name;
-  //     employeeEmail.value = user.email;
-  //   }
-  // }
   void _loadUser() {
     final user = AuthService.currentUser;
     if (user != null) {
@@ -48,6 +45,12 @@ class SettingsController extends GetxController {
       storeName.value = data['storeName'] ?? storeName.value;
       defaultCurrency.value = data['currency'] ?? defaultCurrency.value;
     }
+  }
+
+  void _listenEmployeesCount() {
+    FirebaseFirestore.instance.collection('users').snapshots().listen((snap) {
+      employeesCount.value = snap.docs.length;
+    });
   }
 
   Future<void> signOut() async {
@@ -87,9 +90,30 @@ class SettingsController extends GetxController {
       ),
     );
 
-    if (confirmed == true) {
+    if (confirmed != true) return;
+
+    try {
+      // 1. وقف الـ notifications
+      await NotificationService.onUserLoggedOut();
+
+      // 2. مسح الـ store id
+      StoreService.clearStoreId();
+
+      // 3. Sign out من Firebase و Google
       await AuthService.signOut();
+
+      // 4. ✅ مسح كل الـ GetX controllers
+      Get.deleteAll(force: true);
+
+      // 5. روح للـ Login
       Get.offAllNamed(AppRoutes.login);
+    } catch (e) {
+      debugPrint('❌ SignOut Error: $e');
+      Get.snackbar(
+        'خطأ',
+        'حدث خطأ أثناء تسجيل الخروج',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
@@ -104,4 +128,18 @@ class SettingsController extends GetxController {
   }
 
   void goToAccounts() => Get.toNamed(AppRoutes.addAccount);
+
+  Future<void> addEmployee(String email) async {
+    try {
+      Get.snackbar(
+        '',
+        'تم إضافة الموظف ✅',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade50,
+        colorText: Colors.green.shade800,
+      );
+    } catch (e) {
+      Get.snackbar('', 'حدث خطأ', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
 }

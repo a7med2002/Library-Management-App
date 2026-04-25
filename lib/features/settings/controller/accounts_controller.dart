@@ -4,8 +4,7 @@ import '../../../core/models/receiving_account_model.dart';
 import '../../../core/services/firestore_service.dart';
 
 class AccountsController extends GetxController {
-  final RxList<ReceivingAccountModel> accounts =
-      <ReceivingAccountModel>[].obs;
+  final RxList<ReceivingAccountModel> accounts = <ReceivingAccountModel>[].obs;
   final RxBool isLoading = false.obs;
 
   // Add Account Form
@@ -28,8 +27,11 @@ class AccountsController extends GetxController {
   Future<void> addAccount() async {
     if (nameController.text.trim().isEmpty ||
         identifierController.text.trim().isEmpty) {
-      Get.snackbar('', 'الرجاء تعبئة جميع الحقول',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        '',
+        'الرجاء تعبئة جميع الحقول',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
@@ -47,38 +49,52 @@ class AccountsController extends GetxController {
       await FirestoreService.addAccount(account);
       Get.back();
       _clearForm();
-      Get.snackbar('', 'تم إضافة الحساب ✅',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        '',
+        'تم إضافة الحساب ✅',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> deleteAccount(String id) async {
-    final confirmed = await Get.dialog<bool>(AlertDialog(
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('حذف الحساب',
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'حذف الحساب',
           textAlign: TextAlign.right,
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-      content: const Text('هل أنت متأكد من حذف هذا الحساب؟',
+          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'هل أنت متأكد من حذف هذا الحساب؟',
           textAlign: TextAlign.right,
-          style: TextStyle(fontFamily: 'Cairo')),
-      actions: [
-        TextButton(
+          style: TextStyle(fontFamily: 'Cairo'),
+        ),
+        actions: [
+          TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('إلغاء',
-                style: TextStyle(
-                    fontFamily: 'Cairo', color: Colors.grey))),
-        TextButton(
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+            ),
+          ),
+          TextButton(
             onPressed: () => Get.back(result: true),
-            child: const Text('حذف',
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    color: Colors.red,
-                    fontWeight: FontWeight.w600))),
-      ],
-    ));
+            child: const Text(
+              'حذف',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
 
     if (confirmed == true) {
       await FirestoreService.deleteAccount(id);

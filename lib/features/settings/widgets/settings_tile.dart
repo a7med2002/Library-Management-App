@@ -28,10 +28,7 @@ class SettingsTile extends StatelessWidget {
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
                 // Arrow
@@ -72,11 +69,7 @@ class SettingsTile extends StatelessWidget {
                     color: kAccentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Icon(
-                    icon,
-                    color: kAccentColor,
-                    size: 18,
-                  ),
+                  child: Icon(icon, color: kAccentColor, size: 18),
                 ),
               ],
             ),

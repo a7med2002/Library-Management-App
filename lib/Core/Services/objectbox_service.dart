@@ -1,52 +1,52 @@
-//   _userBox = _store.box<UserModel>();
-import 'package:library_managment/Core/models/user_model.dart';
+import 'package:flutter/material.dart';
+import 'package:library_managment/core/models/user_model.dart';
 import 'package:library_managment/objectbox.g.dart';
 
 class ObjectBoxService {
   static Store? _store;
   static Box<UserModel>? _userBox;
-  static bool _isInitialized = false;
 
-  // ─── Init ─────────────────────────────────────────────────
   static Future<void> init() async {
-    if (_isInitialized) return;
+    if (_store != null) {
+      // لو مفتوح مسبقاً تحقق إذا مش مغلق
+      try {
+        if (!_store!.isClosed()) return;
+      } catch (_) {}
+    }
     _store = await openStore();
-    _userBox = Box<UserModel>(_store!);
-    _isInitialized = true;
+    _userBox = _store!.box<UserModel>();
+    debugPrint('✅ ObjectBox Store opened');
   }
 
-  // ─── Safety Check ─────────────────────────────────────────
-  static Future<void> _ensureInitialized() async {
-    if (!_isInitialized) await init();
-  }
+  static bool get isReady => _store != null && _userBox != null;
 
-  // ─── User ──────────────────────────────────────────────────
-  static Future<void> saveUser(UserModel user) async {
-    await _ensureInitialized();
+  static void saveUser(UserModel user) {
+    _ensureReady();
     _userBox!.removeAll();
     _userBox!.put(user);
   }
 
   static UserModel? getUser() {
-    if (!_isInitialized || _userBox == null) return null;
+    if (!isReady) return null;
     final users = _userBox!.getAll();
     return users.isNotEmpty ? users.first : null;
   }
 
-  static Future<void> clearUser() async {
-    await _ensureInitialized();
+  static void clearUser() {
+    if (!isReady) return;
     _userBox!.removeAll();
   }
 
   static bool get isLoggedIn {
-    if (!_isInitialized || _userBox == null) return false;
     final user = getUser();
     return user != null && user.isLoggedIn;
   }
 
-  // ─── Close ────────────────────────────────────────────────
-  static void close() {
-    _store?.close();
-    _isInitialized = false;
+  static void _ensureReady() {
+    if (!isReady) {
+      throw Exception(
+        'ObjectBox not ready. Make sure init() is called in main()',
+      );
+    }
   }
 }

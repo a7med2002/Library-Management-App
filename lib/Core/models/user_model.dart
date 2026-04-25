@@ -4,14 +4,14 @@ import 'package:objectbox/objectbox.dart';
 class UserModel {
   @Id()
   int id;
-
   String uid;
   String name;
   String email;
   String photoUrl;
   bool isLoggedIn;
+  String storeId;
 
-  @Property(type: PropertyType.date)  
+  @Property(type: PropertyType.date)
   DateTime lastLogin;
 
   UserModel({
@@ -21,6 +21,7 @@ class UserModel {
     required this.email,
     required this.photoUrl,
     required this.isLoggedIn,
+    required this.storeId,
     required this.lastLogin,
   });
 }

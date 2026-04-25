@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/features/payment/model/payment_model.dart';
-
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
 
 class PaymentListItem extends StatelessWidget {
-  final PaymentModel payment;
+  final Map<String, dynamic> payment;
   final String time;
 
-  const PaymentListItem({
-    super.key,
-    required this.payment,
-    required this.time,
-  });
+  const PaymentListItem({super.key, required this.payment, required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +34,7 @@ class PaymentListItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              payment.serviceIcon,
+              _serviceIcon(payment['serviceType'] ?? ''),
               color: kAccentColor,
               size: 20,
             ),
@@ -52,7 +46,7 @@ class PaymentListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  payment.customerName,
+                  payment['customerName'] ?? '',
                   style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: kPrimaryTextColor,
@@ -60,7 +54,7 @@ class PaymentListItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${payment.serviceTypeAr} · $time',
+                  '${_serviceLabel(payment['serviceType'] ?? '')} · $time',
                   style: AppTextStyles.caption,
                 ),
               ],
@@ -71,7 +65,7 @@ class PaymentListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '₪ ${payment.amount.toStringAsFixed(2)}',
+                '₪ ${(payment['amount'] as num).toStringAsFixed(2)}',
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.bold,
                   color: kPrimaryTextColor,
@@ -79,7 +73,7 @@ class PaymentListItem extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                payment.accountName,
+                payment['accountName'] ?? '',
                 style: AppTextStyles.caption.copyWith(
                   color: kSecondaryTextColor,
                 ),
@@ -89,5 +83,27 @@ class PaymentListItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _serviceIcon(String type) {
+    switch (type) {
+      case 'printing':
+        return Icons.print_rounded;
+      case 'photocopying':
+        return Icons.document_scanner_rounded;
+      default:
+        return Icons.miscellaneous_services_rounded;
+    }
+  }
+
+  String _serviceLabel(String type) {
+    switch (type) {
+      case 'printing':
+        return 'طباعة';
+      case 'photocopying':
+        return 'تصوير';
+      default:
+        return 'خدمة أخرى';
+    }
   }
 }

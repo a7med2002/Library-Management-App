@@ -15,8 +15,7 @@ class AccountBreakdownItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final barWidth =
-        (item.amount / maxAmount).clamp(0.0, 1.0);
+    final barWidth = (item.amount / maxAmount).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import 'package:library_managment/Core/Widgets/app_search_bar.dart';
-import 'package:library_managment/Core/Widgets/empty_state.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Widgets/app_search_bar.dart';
+import 'package:library_managment/core/Widgets/empty_state.dart';
 import 'package:library_managment/features/transfers/controller/transfers_controller.dart';
 import 'package:library_managment/features/transfers/widgets/transfer_filter_tabs.dart';
 import 'package:library_managment/features/transfers/widgets/transfer_list_item.dart';
@@ -86,7 +86,7 @@ class _TransfersList extends GetView<TransfersController> {
           final transfer = controller.filteredTransfers[index];
           return TransferListItem(
             transfer: transfer,
-            date: controller.formatDate(transfer.date),
+            date: controller.formatDate(transfer['createdAt']),
           );
         },
       );

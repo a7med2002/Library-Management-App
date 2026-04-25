@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:library_managment/Core/Constants/app_colors.dart';
-import 'package:library_managment/Core/Constants/app_text_styles.dart';
-import 'package:library_managment/Core/Routes/app_routes.dart';
-import 'package:library_managment/Core/Widgets/app_primary_button.dart';
-import 'package:library_managment/Core/Widgets/app_text_field.dart';
+import 'package:library_managment/core/Constants/app_colors.dart';
+import 'package:library_managment/core/Constants/app_text_styles.dart';
+import 'package:library_managment/core/Routes/app_routes.dart';
+import 'package:library_managment/core/Widgets/app_primary_button.dart';
+import 'package:library_managment/core/Widgets/app_text_field.dart';
 import 'package:library_managment/core/models/receiving_account_model.dart';
 import 'package:library_managment/features/add%20transfer/controller/add_transfer_controller.dart';
 

@@ -25,9 +25,7 @@ class MatchResultItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-        ),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
