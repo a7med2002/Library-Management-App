@@ -113,9 +113,6 @@ The project follows a **feature-first Clean Architecture** pattern with GetX as 
 - Record outgoing payments with: recipient name, amount, expense category (supplies, bills, salaries, other), and the paying account.
 - Full outgoing list with real-time updates from Firestore.
 
-### 🏦 Bank Matching (مطابقة البنك)
-- Dedicated reconciliation screen to cross-reference pending incoming transfers against actual bank statements — helping the team identify what has physically arrived vs. what's still recorded as pending.
-
 ### 📊 Reports (تقرير اليوم)
 - **Admins** get unrestricted date range selection.
 - **Employees** are limited to the last 7 days, with a clear in-screen notice.
@@ -175,69 +172,61 @@ library_managment/
 │   ├── images/                        # logo.png, background assets
 │   └── icon/                          # App launcher icon (icon.png)
 │
-├── lib/
-│   ├── main.dart                      # App entry: Firebase & ObjectBox init, GetX setup
-│   ├── firebase_options.dart          # Auto-generated Firebase platform configuration
-│   ├── objectbox.g.dart               # Auto-generated ObjectBox model bindings
-│   │
-│   ├── core/
-│   │   ├── Constants/
-│   │   │   ├── app_colors.dart        # All color constants (navy, gold, status colors)
-│   │   │   └── app_text_styles.dart   # Unified TextStyle system (Tajawal-based)
-│   │   ├── models/
-│   │   │   ├── user_model.dart              # ObjectBox @Entity for local session
-│   │   │   └── receiving_account_model.dart # Firestore model (bank / wallet)
-│   │   ├── Routes/
-│   │   │   ├── app_routes.dart        # Route name string constants
-│   │   │   └── app_pages.dart         # GetPage route registrations
-│   │   ├── Services/
-│   │   │   ├── auth_service.dart          # Google Sign-In + Firebase Auth wrapper
-│   │   │   ├── firestore_service.dart     # All Firestore CRUD, streams, queries
-│   │   │   ├── objectbox_service.dart     # Local ObjectBox store & UserModel box
-│   │   │   ├── pdf_service.dart           # Branded PDF generation & file export
-│   │   │   ├── store_service.dart         # Store init, admin role management
-│   │   │   └── notification_service.dart  # FCM subscription & event dispatchers
-│   │   └── Widgets/
-│   │       ├── app_logo.dart              # Branded logo widget
-│   │       ├── app_primary_button.dart    # Gold CTA button with loading state
-│   │       ├── app_text_field.dart        # Styled RTL text input
-│   │       ├── app_search_bar.dart        # Search input with icon
-│   │       ├── summary_card.dart          # Dashboard metric card
-│   │       ├── quick_action_button.dart   # Home quick action tile
-│   │       ├── background_circles.dart    # Login decorative background
-│   │       └── empty_state.dart           # Empty list placeholder widget
-│   │
-│   └── features/
-│       ├── splash/                   # Splash screen + auth state routing
-│       ├── login/                    # Google Sign-In screen + LoginController
-│       ├── main/                     # BottomNavigationBar wrapper (MainWrapper)
-│       ├── home/                     # Dashboard: summary, recent transactions, quick actions
-│       │   ├── controller/           # HomeController — Firestore streams, formatting helpers
-│       │   ├── model/                # TransactionModel (payment | transfer | outgoing)
-│       │   └── view/                 # HomeScreen + subwidgets
-│       ├── payment/                  # Payments list, filters, search
-│       ├── add payment/              # Add payment form + AddPaymentController
-│       ├── transfers/                # Incoming transfers list, detail view
-│       ├── add transfer/             # Add incoming transfer form + AddTransferController
-│       ├── outgoing transfers/       # Outgoing expenses list + add form
-│       ├── bank match/               # Bank reconciliation screen + controller
-│       ├── today report/             # Date-range report, stats grid, PDF/Excel export
-│       │   ├── controller/           # ReportController — date range, admin check, totals
-│       │   ├── model/                # AccountReportModel, ReportModel
-│       │   └── view/                 # ReportScreen + stat cards, breakdown widgets
-│       └── settings/                 # Profile, store settings, accounts management
-│           ├── controller/           # SettingsController + AccountsController
-│           └── view/                 # SettingsScreen + AddAccountScreen
-│
-├── test/
-│   └── widget_test.dart
-│
-├── android/                          # Android native config + FCM service + manifest
-├── ios/                              # iOS native config
-├── pubspec.yaml
-├── firebase.json
-├── flutter_launcher_icons.yaml
-└── analysis_options.yaml
+└── lib/
+    ├── main.dart                      # App entry: Firebase & ObjectBox init, GetX setup
+    ├── firebase_options.dart          # Auto-generated Firebase platform configuration
+    ├── objectbox.g.dart               # Auto-generated ObjectBox model bindings
+    │
+    ├── core/
+    │   ├── Constants/
+    │   │   ├── app_colors.dart        # All color constants (navy, gold, status colors)
+    │   │   └── app_text_styles.dart   # Unified TextStyle system (Tajawal-based)
+    │   ├── models/
+    │   │   ├── user_model.dart              # ObjectBox @Entity for local session
+    │   │   └── receiving_account_model.dart # Firestore model (bank / wallet)
+    │   ├── Routes/
+    │   │   ├── app_routes.dart        # Route name string constants
+    │   │   └── app_pages.dart         # GetPage route registrations
+    │   ├── Services/
+    │   │   ├── auth_service.dart          # Google Sign-In + Firebase Auth wrapper
+    │   │   ├── firestore_service.dart     # All Firestore CRUD, streams, queries
+    │   │   ├── objectbox_service.dart     # Local ObjectBox store & UserModel box
+    │   │   ├── pdf_service.dart           # Branded PDF generation & file export
+    │   │   ├── store_service.dart         # Store init, admin role management
+    │   │   └── notification_service.dart  # FCM subscription & event dispatchers
+    │   └── Widgets/
+    │       ├── app_logo.dart              # Branded logo widget
+    │       ├── app_primary_button.dart    # Gold CTA button with loading state
+    │       ├── app_text_field.dart        # Styled RTL text input
+    │       ├── app_search_bar.dart        # Search input with icon
+    │       ├── summary_card.dart          # Dashboard metric card
+    │       ├── quick_action_button.dart   # Home quick action tile
+    │       ├── background_circles.dart    # Login decorative background
+    │       └── empty_state.dart           # Empty list placeholder widget
+    │
+    └── features/
+        ├── splash/                   # Splash screen + auth state routing
+        ├── login/                    # Google Sign-In screen + LoginController
+        ├── main/                     # BottomNavigationBar wrapper (MainWrapper)
+        ├── home/                     # Dashboard: summary, recent transactions, quick actions
+        │   ├── controller/           # HomeController — Firestore streams, formatting helpers
+        │   ├── model/                # TransactionModel (payment | transfer | outgoing)
+        │   └── view/                 # HomeScreen + subwidgets
+        ├── payment/                  # Payments list, filters, search
+        ├── add payment/              # Add payment form + AddPaymentController
+        ├── transfers/                # Incoming transfers list, detail view
+        ├── add transfer/             # Add incoming transfer form + AddTransferController
+        ├── outgoing transfers/       # Outgoing expenses list + add form
+        ├── bank match/               # Bank reconciliation screen + controller
+        ├── today report/             # Date-range report, stats grid, PDF/Excel export
+        │   ├── controller/           # ReportController — date range, admin check, totals
+        │   ├── model/                # AccountReportModel, ReportModel
+        │   └── view/                 # ReportScreen + stat cards, breakdown widgets
+        └── settings/                 # Profile, store settings, accounts management
+            ├── controller/           # SettingsController + AccountsController
+            └── view/                 # SettingsScreen + AddAccountScreen
+
+
 ```
 
 ---
