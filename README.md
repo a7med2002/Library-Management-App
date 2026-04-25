@@ -327,19 +327,21 @@ Here are the planned enhancements for upcoming versions:
 
 ## 📸 Screenshots
 
-> _Screenshots will be added once the UI is finalized._
+![app_view1](assets/images/view1.png)
 
-| Login | Home Dashboard | Payments |
-|:---:|:---:|:---:|
-| `coming soon` | `coming soon` | `coming soon` |
+![app_view2](assets/images/view2.png)
 
-| Add Transfer | Transfers List | Transfer Detail |
-|:---:|:---:|:---:|
-| `coming soon` | `coming soon` | `coming soon` |
+![app_view3](assets/images/view3.png)
 
-| Daily Report | PDF Export | Settings |
-|:---:|:---:|:---:|
-| `coming soon` | `coming soon` | `coming soon` |
+![app_view4](assets/images/view4.png)
+
+![app_view5](assets/images/view5.png)
+
+![app_view6](assets/images/view6.png)
+
+![app_view7](assets/images/view7.png)
+
+![app_view8](assets/images/view8.png)
 
 ---
 
