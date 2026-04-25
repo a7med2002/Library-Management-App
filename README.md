@@ -327,21 +327,25 @@ Here are the planned enhancements for upcoming versions:
 
 ## 📸 Screenshots
 
-![app_view1](assets/images/view1.png)
+<p align="center">
+  <img src="assets/images/view1.png" width="45%" />
+  <img src="assets/images/view2.png" width="45%" />
+</p>
 
-![app_view2](assets/images/view2.png)
+<p align="center">
+  <img src="assets/images/view3.png" width="45%" />
+  <img src="assets/images/view4.png" width="45%" />
+</p>
 
-![app_view3](assets/images/view3.png)
+<p align="center">
+  <img src="assets/images/view5.png" width="45%" />
+  <img src="assets/images/view6.png" width="45%" />
+</p>
 
-![app_view4](assets/images/view4.png)
-
-![app_view5](assets/images/view5.png)
-
-![app_view6](assets/images/view6.png)
-
-![app_view7](assets/images/view7.png)
-
-![app_view8](assets/images/view8.png)
+<p align="center">
+  <img src="assets/images/view7.png" width="45%" />
+  <img src="assets/images/view8.png" width="45%" />
+</p>
 
 ---
 
